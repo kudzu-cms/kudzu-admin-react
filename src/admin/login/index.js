@@ -1,6 +1,6 @@
+import React from "react"
 import axios from "axios";
 import qs from 'qs'
-import React from "react"
 
 import Page from "../../layout/page";
 
@@ -26,7 +26,8 @@ class  Login extends React.Component {
     axios.post(`${this.baseUrl}/admin/login`, qs.stringify(data), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
-      }
+      },
+      withCredentials: true,
     })
     .then((response) => {
       this.setState({messages: []});
