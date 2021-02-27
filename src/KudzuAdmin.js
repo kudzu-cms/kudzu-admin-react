@@ -11,6 +11,8 @@ import axios from "axios";
 import Content from "./admin/content";
 import Login from "./admin/login";
 import Users from "./admin/users";
+import NoMatch from "./misc/no-match";
+import Page from "./layout/page";
 
 class KudzuAdmin extends React.Component {
 
@@ -44,22 +46,23 @@ class KudzuAdmin extends React.Component {
 
   render() {
     return (
+      <Page>
       <Router>
         <div>
           <nav>
             <ul>
             { !this.state.isAuthenticated &&
               <li>
-                <Link to="/login">Login</Link>
+                <Link key="login" to="/login">Login</Link>
               </li>
             }
             { this.state.isAuthenticated &&
               <>
               <li>
-                <Link to="/admin/content">Content</Link>
+                <Link key="admin:content" to="/admin/content">Content</Link>
               </li>
               <li>
-                <Link to="/admin/users">Users</Link>
+                <Link key="admin:users" to="/admin/users">Users</Link>
               </li>
               </>
             }
@@ -77,15 +80,23 @@ class KudzuAdmin extends React.Component {
                 <Redirect to="/admin/content" />
               }
             </Route>
-            <Route path="/admin/users">
-              <Users />
-            </Route>
-            <Route path="/admin/content">
-              <Content />
+            { this.state.isAuthenticated &&
+              <>
+              <Route path="/admin/users">
+                <Users />
+              </Route>
+              <Route path="/admin/content">
+                <Content />
+              </Route>
+              </>
+            }
+            <Route path="*">
+              <NoMatch/>
             </Route>
           </Switch>
         </div>
       </Router>
+      </Page>
     );
   }
 }
