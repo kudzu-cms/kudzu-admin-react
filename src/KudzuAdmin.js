@@ -14,6 +14,10 @@ import NoMatch from "./misc/no-match";
 import Page from "./layout/page";
 import { AppBar, Button, Toolbar } from "@material-ui/core";
 
+const AUTH_PENDING = "pending";
+const AUTH_AUTHENTICATED = "authenticated";
+const AUTH_UNAUTHENTICATED = "unauthenticated";
+
 class KudzuAdmin extends React.Component {
 
   constructor(props) {
@@ -21,7 +25,7 @@ class KudzuAdmin extends React.Component {
 
     this.state = {
       baseUrl: process.env.REACT_APP_KUDZU_BASE_URL,
-      isAuthenticated: null,
+      authStatus: AUTH_PENDING,
     };
   }
 
@@ -36,14 +40,14 @@ class KudzuAdmin extends React.Component {
     .then(response => {
       console.log(response)
       if (response.data.success === true) {
-        this.setState({isAuthenticated: true})
+        this.setState({authStatus: AUTH_AUTHENTICATED})
         return;
       }
-      this.setState({isAuthenticated: false})
+      this.setState({authStatus: AUTH_UNAUTHENTICATED})
     })
     .catch(error => {
       console.error(error)
-      this.setState({isAuthenticated: false})
+      this.setState({authStatus: AUTH_UNAUTHENTICATED})
     })
   }
 
@@ -53,10 +57,10 @@ class KudzuAdmin extends React.Component {
       <Router>
         <AppBar position="static">
           <Toolbar variant="dense">
-            { this.state.isAuthenticated === false &&
+            { this.state.authStatus === AUTH_UNAUTHENTICATED &&
               <Button key="login" href="/login">Login</Button>
             }
-            { this.state.isAuthenticated &&
+            { this.state.authStatus === AUTH_AUTHENTICATED &&
               <>
               <Button key="admin:content" href="/admin/content">Content</Button>
               <Button key="admin:users" href="/admin/users">Users</Button>
@@ -66,25 +70,25 @@ class KudzuAdmin extends React.Component {
         </AppBar>
         <Switch>
           <Route path="/login">
-            { !this.state.isAuthenticated &&
+            { this.state.authStatus === AUTH_UNAUTHENTICATED &&
               <Login baseUrl={this.state.baseUrl} />
             }
-            { this.state.isAuthenticated &&
+            { this.state.authStatus === AUTH_AUTHENTICATED &&
               <Redirect to="/admin/content" />
             }
           </Route>
-          { this.state.isAuthenticated &&
-            <>
-            <Route path="/admin/users">
-              <Users />
-            </Route>
-            <Route path="/admin/content">
-              <Content />
-            </Route>
-            </>
-          }
+          <Route path="/admin/users">
+            { this.state.authStatus === AUTH_AUTHENTICATED ?
+              <Users /> : <NoMatch authStatus={this.state.authStatus} />
+            }
+          </Route>
+          <Route path="/admin/content">
+            { this.state.authStatus === AUTH_AUTHENTICATED ?
+                <Content /> : <NoMatch authStatus={this.state.authStatus} />
+            }
+          </Route>
           <Route path="*">
-            <NoMatch authenticated={this.state.isAuthenticated}/>
+            <NoMatch authStatus={this.state.authStatus}/>
           </Route>
         </Switch>
       </Router>
@@ -93,5 +97,9 @@ class KudzuAdmin extends React.Component {
   }
 }
 
-
-export default KudzuAdmin;
+export {
+  KudzuAdmin,
+  AUTH_PENDING,
+  AUTH_AUTHENTICATED,
+  AUTH_UNAUTHENTICATED
+}

@@ -1,11 +1,12 @@
 import { useLocation } from "react-router-dom"
+import { AUTH_PENDING } from "../KudzuAdmin";
 
-function NoMatch({authenticated}) {
+function NoMatch({authStatus}) {
 
   let location = useLocation();
 
   // Do nothing if we don't know the authentication status.
-  if (authenticated === null) {
+  if (authStatus === AUTH_PENDING) {
     return null;
   }
 
