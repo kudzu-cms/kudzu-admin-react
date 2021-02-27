@@ -21,7 +21,7 @@ class KudzuAdmin extends React.Component {
 
     this.state = {
       baseUrl: process.env.REACT_APP_KUDZU_BASE_URL,
-      isAuthenticated: false,
+      isAuthenticated: null,
     };
   }
 
@@ -37,10 +37,13 @@ class KudzuAdmin extends React.Component {
       console.log(response)
       if (response.data.success === true) {
         this.setState({isAuthenticated: true})
+        return;
       }
+      this.setState({isAuthenticated: false})
     })
     .catch(error => {
       console.error(error)
+      this.setState({isAuthenticated: false})
     })
   }
 
@@ -50,7 +53,7 @@ class KudzuAdmin extends React.Component {
       <Router>
         <AppBar position="static">
           <Toolbar variant="dense">
-            { !this.state.isAuthenticated &&
+            { this.state.isAuthenticated === false &&
               <Button key="login" href="/login">Login</Button>
             }
             { this.state.isAuthenticated &&
@@ -81,7 +84,7 @@ class KudzuAdmin extends React.Component {
             </>
           }
           <Route path="*">
-            <NoMatch/>
+            <NoMatch authenticated={this.state.isAuthenticated}/>
           </Route>
         </Switch>
       </Router>
