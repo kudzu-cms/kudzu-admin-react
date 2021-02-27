@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  BrowserRouter as Router,
+  BrowserRouter,
   Switch,
   Route,
   Redirect
@@ -54,47 +54,62 @@ class KudzuAdmin extends React.Component {
   render() {
     return (
       <Page>
-      <Router>
-        <AppBar position="static">
-          <Toolbar variant="dense">
-            { this.state.authStatus === AUTH_UNAUTHENTICATED &&
-              <Button key="login" href="/login">Login</Button>
-            }
-            { this.state.authStatus === AUTH_AUTHENTICATED &&
-              <>
-              <Button key="admin:content" href="/admin/content">Content</Button>
-              <Button key="admin:users" href="/admin/users">Users</Button>
-              </>
-            }
-          </Toolbar>
-        </AppBar>
-        <Switch>
-          <Route path="/login" exact={true}>
-            { this.state.authStatus === AUTH_UNAUTHENTICATED &&
-              <Login baseUrl={this.state.baseUrl} />
-            }
-            { this.state.authStatus === AUTH_AUTHENTICATED &&
-              <Redirect to="/admin/content" />
-            }
-          </Route>
-          <Route path="/admin/users" exact={true}>
-            { this.state.authStatus === AUTH_AUTHENTICATED ?
-              <Users /> : <NoMatch authStatus={this.state.authStatus} />
-            }
-          </Route>
-          <Route path="/admin/content" exact={true}>
-            { this.state.authStatus === AUTH_AUTHENTICATED ?
-                <Content /> : <NoMatch authStatus={this.state.authStatus} />
-            }
-          </Route>
-          <Route path="*">
-            <NoMatch authStatus={this.state.authStatus}/>
-          </Route>
-        </Switch>
-      </Router>
+      <KudzuToolbar authStatus={this.state.authStatus} />
+      <KudzuRouter
+        baseUrl={this.state.baseUrl}
+        authStatus={this.state.authStatus}
+      />
       </Page>
     );
   }
+}
+
+function KudzuToolbar({authStatus}) {
+  return (
+    <AppBar position="static">
+    <Toolbar variant="dense">
+      { authStatus === AUTH_UNAUTHENTICATED &&
+        <Button key="login" href="/login">Login</Button>
+      }
+      { authStatus === AUTH_AUTHENTICATED &&
+        <>
+        <Button key="admin:content" href="/admin/content">Content</Button>
+        <Button key="admin:users" href="/admin/users">Users</Button>
+        </>
+      }
+    </Toolbar>
+  </AppBar>
+  )
+}
+
+function KudzuRouter({baseUrl, authStatus}) {
+  return (
+    <BrowserRouter>
+    <Switch>
+      <Route path="/login" exact={true}>
+        { authStatus === AUTH_UNAUTHENTICATED &&
+          <Login baseUrl={baseUrl} />
+        }
+        { authStatus === AUTH_AUTHENTICATED &&
+          <Redirect to="/admin/content" />
+        }
+      </Route>
+      <Route path="/admin/users" exact={true}>
+        { authStatus === AUTH_AUTHENTICATED ?
+          <Users /> : <NoMatch authStatus={authStatus} />
+        }
+      </Route>
+      <Route path="/admin/content" exact={true}>
+        { authStatus === AUTH_AUTHENTICATED ?
+            <Content /> : <NoMatch authStatus={authStatus} />
+        }
+      </Route>
+      <Route path="*">
+        <NoMatch authStatus={authStatus}/>
+      </Route>
+    </Switch>
+  </BrowserRouter>
+  )
 }
 
 export {
