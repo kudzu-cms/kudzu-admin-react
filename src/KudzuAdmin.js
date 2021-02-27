@@ -69,7 +69,7 @@ class KudzuAdmin extends React.Component {
           </Toolbar>
         </AppBar>
         <Switch>
-          <Route path="/login">
+          <Route path="/login" exact={true}>
             { this.state.authStatus === AUTH_UNAUTHENTICATED &&
               <Login baseUrl={this.state.baseUrl} />
             }
@@ -77,12 +77,12 @@ class KudzuAdmin extends React.Component {
               <Redirect to="/admin/content" />
             }
           </Route>
-          <Route path="/admin/users">
+          <Route path="/admin/users" exact={true}>
             { this.state.authStatus === AUTH_AUTHENTICATED ?
               <Users /> : <NoMatch authStatus={this.state.authStatus} />
             }
           </Route>
-          <Route path="/admin/content">
+          <Route path="/admin/content" exact={true}>
             { this.state.authStatus === AUTH_AUTHENTICATED ?
                 <Content /> : <NoMatch authStatus={this.state.authStatus} />
             }
