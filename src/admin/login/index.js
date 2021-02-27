@@ -4,13 +4,13 @@ import qs from 'qs'
 
 import { Button, TextField } from "@material-ui/core";
 import { Alert } from '@material-ui/lab';
+import { KUDZU_BASE_URL } from "../../KudzuAdmin";
 
 class  Login extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {messages: []}
-    this.baseUrl = props.baseUrl;
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -21,7 +21,7 @@ class  Login extends React.Component {
       password: event.target.password.value
     };
     this.setState({messages: []});
-    axios.post(`${this.baseUrl}/admin/login`, qs.stringify(data), {
+    axios.post(`${KUDZU_BASE_URL}/admin/login`, qs.stringify(data), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
       },
@@ -63,7 +63,7 @@ class  Login extends React.Component {
           <Button type='submit' variant='contained' size='large' color='primary' style={{marginRight: '5px'}}>
             Log in
           </Button>
-          <Button href={`${this.baseUrl}/admin/recover`} variant='contained' size='large'>
+          <Button href={`${KUDZU_BASE_URL}/admin/recover`} variant='contained' size='large'>
             Forgot password?
           </Button>
         </div>

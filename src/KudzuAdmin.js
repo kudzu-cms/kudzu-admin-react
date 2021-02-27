@@ -14,6 +14,7 @@ import NoMatch from "./misc/no-match";
 import Page from "./layout/page";
 import { AppBar, Button, Toolbar } from "@material-ui/core";
 
+const KUDZU_BASE_URL = process.env.REACT_APP_KUDZU_BASE_URL;
 const AUTH_PENDING = "pending";
 const AUTH_AUTHENTICATED = "authenticated";
 const AUTH_UNAUTHENTICATED = "unauthenticated";
@@ -24,7 +25,6 @@ class KudzuAdmin extends React.Component {
     super(props);
 
     this.state = {
-      baseUrl: process.env.REACT_APP_KUDZU_BASE_URL,
       authStatus: AUTH_PENDING,
     };
   }
@@ -34,7 +34,7 @@ class KudzuAdmin extends React.Component {
   }
 
   checkIsAuthenticated() {
-    axios.get(`${this.state.baseUrl}/admin/login`, {
+    axios.get(`${KUDZU_BASE_URL}/admin/login`, {
       withCredentials: true,
     })
     .then(response => {
@@ -55,10 +55,7 @@ class KudzuAdmin extends React.Component {
     return (
       <Page>
       <KudzuToolbar authStatus={this.state.authStatus} />
-      <KudzuRouter
-        baseUrl={this.state.baseUrl}
-        authStatus={this.state.authStatus}
-      />
+      <KudzuRouter authStatus={this.state.authStatus} />
       </Page>
     );
   }
@@ -82,13 +79,13 @@ function KudzuToolbar({authStatus}) {
   )
 }
 
-function KudzuRouter({baseUrl, authStatus}) {
+function KudzuRouter({authStatus}) {
   return (
     <BrowserRouter>
     <Switch>
       <Route path="/login" exact={true}>
         { authStatus === AUTH_UNAUTHENTICATED &&
-          <Login baseUrl={baseUrl} />
+          <Login />
         }
         { authStatus === AUTH_AUTHENTICATED &&
           <Redirect to="/admin/content" />
@@ -114,6 +111,7 @@ function KudzuRouter({baseUrl, authStatus}) {
 
 export {
   KudzuAdmin,
+  KUDZU_BASE_URL,
   AUTH_PENDING,
   AUTH_AUTHENTICATED,
   AUTH_UNAUTHENTICATED
