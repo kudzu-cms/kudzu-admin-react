@@ -15,9 +15,9 @@ import Page from "./layout/page";
 import { AppBar, Button, Toolbar } from "@material-ui/core";
 
 const KUDZU_BASE_URL = process.env.REACT_APP_KUDZU_BASE_URL;
-const AUTH_PENDING = "pending";
-const AUTH_AUTHENTICATED = "authenticated";
-const AUTH_UNAUTHENTICATED = "unauthenticated";
+const KUDZU_AUTH_PENDING = "pending";
+const KUDZU_AUTH_AUTHENTICATED = "authenticated";
+const KUDZU_AUTH_UNAUTHENTICATED = "unauthenticated";
 
 class KudzuAdmin extends React.Component {
 
@@ -25,7 +25,7 @@ class KudzuAdmin extends React.Component {
     super(props);
 
     this.state = {
-      authStatus: AUTH_PENDING,
+      authStatus: KUDZU_AUTH_PENDING,
     };
   }
 
@@ -40,14 +40,14 @@ class KudzuAdmin extends React.Component {
     .then(response => {
       console.log(response)
       if (response.data.success === true) {
-        this.setState({authStatus: AUTH_AUTHENTICATED})
+        this.setState({authStatus: KUDZU_AUTH_AUTHENTICATED})
         return;
       }
-      this.setState({authStatus: AUTH_UNAUTHENTICATED})
+      this.setState({authStatus: KUDZU_AUTH_UNAUTHENTICATED})
     })
     .catch(error => {
       console.error(error)
-      this.setState({authStatus: AUTH_UNAUTHENTICATED})
+      this.setState({authStatus: KUDZU_AUTH_UNAUTHENTICATED})
     })
   }
 
@@ -65,10 +65,10 @@ function KudzuToolbar({authStatus}) {
   return (
     <AppBar position="static">
     <Toolbar variant="dense">
-      { authStatus === AUTH_UNAUTHENTICATED &&
+      { authStatus === KUDZU_AUTH_UNAUTHENTICATED &&
         <Button key="login" href="/login">Login</Button>
       }
-      { authStatus === AUTH_AUTHENTICATED &&
+      { authStatus === KUDZU_AUTH_AUTHENTICATED &&
         <>
         <Button key="admin:content" href="/admin/content">Content</Button>
         <Button key="admin:users" href="/admin/users">Users</Button>
@@ -84,20 +84,20 @@ function KudzuRouter({authStatus}) {
     <BrowserRouter>
     <Switch>
       <Route path="/login" exact={true}>
-        { authStatus === AUTH_UNAUTHENTICATED &&
+        { authStatus === KUDZU_AUTH_UNAUTHENTICATED &&
           <Login />
         }
-        { authStatus === AUTH_AUTHENTICATED &&
+        { authStatus === KUDZU_AUTH_AUTHENTICATED &&
           <Redirect to="/admin/content" />
         }
       </Route>
       <Route path="/admin/users" exact={true}>
-        { authStatus === AUTH_AUTHENTICATED ?
+        { authStatus === KUDZU_AUTH_AUTHENTICATED ?
           <Users /> : <NoMatch authStatus={authStatus} />
         }
       </Route>
       <Route path="/admin/content" exact={true}>
-        { authStatus === AUTH_AUTHENTICATED ?
+        { authStatus === KUDZU_AUTH_AUTHENTICATED ?
             <Content /> : <NoMatch authStatus={authStatus} />
         }
       </Route>
@@ -112,7 +112,7 @@ function KudzuRouter({authStatus}) {
 export {
   KudzuAdmin,
   KUDZU_BASE_URL,
-  AUTH_PENDING,
-  AUTH_AUTHENTICATED,
-  AUTH_UNAUTHENTICATED
+  KUDZU_AUTH_PENDING,
+  KUDZU_AUTH_AUTHENTICATED,
+  KUDZU_AUTH_UNAUTHENTICATED
 }
