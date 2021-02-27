@@ -3,7 +3,6 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link,
   Redirect
 } from "react-router-dom";
 import axios from "axios";
@@ -13,6 +12,7 @@ import Login from "./admin/login";
 import Users from "./admin/users";
 import NoMatch from "./misc/no-match";
 import Page from "./layout/page";
+import { AppBar, Button, Toolbar } from "@material-ui/core";
 
 class KudzuAdmin extends React.Component {
 
@@ -48,53 +48,42 @@ class KudzuAdmin extends React.Component {
     return (
       <Page>
       <Router>
-        <div>
-          <nav>
-            <ul>
+        <AppBar position="static">
+          <Toolbar variant="dense">
             { !this.state.isAuthenticated &&
-              <li>
-                <Link key="login" to="/login">Login</Link>
-              </li>
+              <Button key="login" href="/login">Login</Button>
             }
             { this.state.isAuthenticated &&
               <>
-              <li>
-                <Link key="admin:content" to="/admin/content">Content</Link>
-              </li>
-              <li>
-                <Link key="admin:users" to="/admin/users">Users</Link>
-              </li>
+              <Button key="admin:content" href="/admin/content">Content</Button>
+              <Button key="admin:users" href="/admin/users">Users</Button>
               </>
             }
-            </ul>
-          </nav>
-
-          {/* A <Switch> looks through its children <Route>s and
-              renders the first one that matches the current URL. */}
-          <Switch>
-            <Route path="/login">
-              { !this.state.isAuthenticated &&
-                <Login baseUrl={this.state.baseUrl} />
-              }
-              { this.state.isAuthenticated &&
-                <Redirect to="/admin/content" />
-              }
-            </Route>
+          </Toolbar>
+        </AppBar>
+        <Switch>
+          <Route path="/login">
+            { !this.state.isAuthenticated &&
+              <Login baseUrl={this.state.baseUrl} />
+            }
             { this.state.isAuthenticated &&
-              <>
-              <Route path="/admin/users">
-                <Users />
-              </Route>
-              <Route path="/admin/content">
-                <Content />
-              </Route>
-              </>
+              <Redirect to="/admin/content" />
             }
-            <Route path="*">
-              <NoMatch/>
+          </Route>
+          { this.state.isAuthenticated &&
+            <>
+            <Route path="/admin/users">
+              <Users />
             </Route>
-          </Switch>
-        </div>
+            <Route path="/admin/content">
+              <Content />
+            </Route>
+            </>
+          }
+          <Route path="*">
+            <NoMatch/>
+          </Route>
+        </Switch>
       </Router>
       </Page>
     );

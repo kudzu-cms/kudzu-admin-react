@@ -2,8 +2,6 @@ import React from "react"
 import axios from "axios";
 import qs from 'qs'
 
-import Page from "../../layout/page";
-
 import { Button, TextField } from "@material-ui/core";
 import { Alert } from '@material-ui/lab';
 
@@ -45,7 +43,7 @@ class  Login extends React.Component {
 
   render() {
     return (
-      <Page>
+      <>
       <h1>Login</h1>
       { this.state.messages.map(message => {
           return <Alert severity="error" style={{marginBottom: "5px"}}>{ message }</Alert>
@@ -70,7 +68,7 @@ class  Login extends React.Component {
           </Button>
         </div>
       </form>
-      </Page>
+      </>
     )
   }
 }
