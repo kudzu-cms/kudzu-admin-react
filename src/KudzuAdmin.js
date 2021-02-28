@@ -26,14 +26,28 @@ class KudzuAdmin extends React.Component {
 
     this.state = {
       authStatus: KUDZU_AUTH_PENDING,
+      contentTypes: [],
     };
   }
 
   componentDidMount() {
-    this.checkIsAuthenticated();
+    this.checkIsAuthenticated(() => {
+      axios.get(`${KUDZU_BASE_URL}/admin/contents/decoupled`, {
+        withCredentials: true,
+      })
+      .then(response => {
+        console.log(response)
+        if (response.status === 200) {
+          this.setState({contentTypes: Object.keys(response.data)})
+        }
+      })
+      .catch(error => {
+        console.error(error)
+      })
+    });
   }
 
-  checkIsAuthenticated() {
+  checkIsAuthenticated(successCallback) {
     axios.get(`${KUDZU_BASE_URL}/admin/login`, {
       withCredentials: true,
     })
@@ -41,6 +55,7 @@ class KudzuAdmin extends React.Component {
       console.log(response)
       if (response.data.success === true) {
         this.setState({authStatus: KUDZU_AUTH_AUTHENTICATED})
+        successCallback();
         return;
       }
       this.setState({authStatus: KUDZU_AUTH_UNAUTHENTICATED})
@@ -55,7 +70,10 @@ class KudzuAdmin extends React.Component {
     return (
       <Page>
       <KudzuToolbar authStatus={this.state.authStatus} />
-      <KudzuRouter authStatus={this.state.authStatus} />
+      <KudzuRouter
+        contentTypes={this.state.contentTypes}
+        authStatus={this.state.authStatus}
+      />
       </Page>
     );
   }
@@ -79,7 +97,7 @@ function KudzuToolbar({authStatus}) {
   )
 }
 
-function KudzuRouter({authStatus}) {
+function KudzuRouter({authStatus, contentTypes}) {
   return (
     <BrowserRouter>
     <Switch>
@@ -98,7 +116,7 @@ function KudzuRouter({authStatus}) {
       </Route>
       <Route path="/admin/content" exact={true}>
         { authStatus === KUDZU_AUTH_AUTHENTICATED ?
-            <Content /> : <NoMatch authStatus={authStatus} />
+            <Content contentTypes={contentTypes} /> : <NoMatch authStatus={authStatus} />
         }
       </Route>
       <Route path="*">
