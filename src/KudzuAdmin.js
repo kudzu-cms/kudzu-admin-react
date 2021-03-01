@@ -26,25 +26,11 @@ class KudzuAdmin extends React.Component {
 
     this.state = {
       authStatus: KUDZU_AUTH_PENDING,
-      contentTypes: [],
     };
   }
 
   componentDidMount() {
-    this.checkIsAuthenticated(() => {
-      axios.get(`${KUDZU_BASE_URL}/admin/contents/decoupled`, {
-        withCredentials: true,
-      })
-      .then(response => {
-        console.log(response)
-        if (response.status === 200) {
-          this.setState({contentTypes: Object.keys(response.data)})
-        }
-      })
-      .catch(error => {
-        console.error(error)
-      })
-    });
+    this.checkIsAuthenticated();
   }
 
   checkIsAuthenticated(successCallback) {
@@ -55,7 +41,6 @@ class KudzuAdmin extends React.Component {
       console.log(response)
       if (response.data.success === true) {
         this.setState({authStatus: KUDZU_AUTH_AUTHENTICATED})
-        successCallback();
         return;
       }
       this.setState({authStatus: KUDZU_AUTH_UNAUTHENTICATED})

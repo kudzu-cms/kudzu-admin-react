@@ -1,6 +1,6 @@
 function Page({children}) {
   return (
-    <main style={{maxWidth: '960px', margin: 'auto'}}>
+    <main>
       {children}
     </main>
   )
