@@ -85,7 +85,10 @@ class Content extends React.Component {
             />
           </Grid>
           <Grid item xs={9}>
-            <ContentListTable contentList={this.state.contentList} />
+            <ContentListTable
+              contentList={this.state.contentList}
+              contentType={this.state.selectedType}
+            />
           </Grid>
         </Grid>
         </>
@@ -106,7 +109,7 @@ function Sidebar({contentTypes, clickHandler}) {
   )
 }
 
-function ContentListTable({contentList}) {
+function ContentListTable({contentList, contentType}) {
 
   if (contentList.length === 0) {
     return null;
@@ -146,10 +149,10 @@ function ContentListTable({contentList}) {
                 <TableCell key={`${value.uuid}:updated`} align="left">{ timestampFormatter.format(value.updated) }</TableCell>
                 {/* @todo Use a single split button, see https://material-ui.com/components/button-group/#split-button */}
                 <TableCell key={`${value.uuid}:edit`} align="left">
-                  <Button color="primary" variant="contained" href={`/admin/content/edit/${value.uuid}`}>Edit</Button>
+                  <Button color="primary" variant="contained" href={`/admin/content/${contentType.toLowerCase()}/${value.uuid}/edit`}>Edit</Button>
                 </TableCell>
                 <TableCell key={`${value.uuid}:delete`} align="left">
-                  <Button color="secondary" variant="contained" href={`/admin/content/delete/${value.uuid}`}>Delete</Button>
+                  <Button color="secondary" variant="contained" href={`/admin/content/${contentType.toLowerCase()}/${value.uuid}/delete`}>Delete</Button>
                 </TableCell>
               </TableRow>
             )
