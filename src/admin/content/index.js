@@ -3,10 +3,11 @@ import axios from "axios"
 
 import { KUDZU_BASE_URL } from "../../KudzuAdmin";
 import {
+  Button,
   Grid,
   MenuItem,
   MenuList,
-  Paper, Table,
+  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -111,14 +112,15 @@ function ContentListTable({contentList}) {
     return null;
   }
 
-  let header = Object.keys(contentList[0]);
   return(
+    <>
+    <h1>Content</h1>
     <TableContainer>
-    <Table size="small" aria-label="a dense table">
+    <Table size="small">
       <TableHead>
         <TableRow>
-          { header.map(value => {
-            return <TableCell align="right">{ value } </TableCell>
+          { ["UUID", "ID", "Slug", "Created", "Updated", "Edit", "Delete"].map(value => {
+            return <TableCell key={value} align="left">{ value }</TableCell>
           })
 
           }
@@ -128,12 +130,19 @@ function ContentListTable({contentList}) {
         { contentList.map(value => {
             return(
               <TableRow key={value.uuid}>
-                <TableCell align="right">{value.uuid}</TableCell>
-                <TableCell align="right">{value.id}</TableCell>
-                <TableCell align="right">{value.slug}</TableCell>
-                <TableCell align="right">{value.timestamp}</TableCell>
-                <TableCell align="right">{value.updated}</TableCell>
-                <TableCell align="right">{value.title}</TableCell>
+                <TableCell key={`${value.uuid}:uuid`} align="left">{ value.uuid }</TableCell>
+                <TableCell key={`${value.uuid}:id`} align="left">{ value.id }</TableCell>
+                <TableCell key={`${value.uuid}:slug`} align="left">{ value.slug }</TableCell>
+                {/* @todo Format timestamps. */}
+                <TableCell key={`${value.uuid}:timestamp`} align="left">{ value.timestamp }</TableCell>
+                <TableCell key={`${value.uuid}:updated`} align="left">{ value.updated }</TableCell>
+                {/* @todo Use a single split button, see https://material-ui.com/components/button-group/#split-button */}
+                <TableCell key={`${value.uuid}:edit`} align="left">
+                  <Button color="primary" variant="contained" href={`/admin/content/edit/${value.uuid}`}>Edit</Button>
+                </TableCell>
+                <TableCell key={`${value.uuid}:delete`} align="left">
+                  <Button color="secondary" variant="contained" href={`/admin/content/delete/${value.uuid}`}>Delete</Button>
+                </TableCell>
               </TableRow>
             )
           })
@@ -141,6 +150,7 @@ function ContentListTable({contentList}) {
       </TableBody>
     </Table>
   </TableContainer>
+  </>
   )
 }
 

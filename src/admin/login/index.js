@@ -49,7 +49,7 @@ class  Login extends React.Component {
           return <Alert severity="error" style={{marginBottom: "5px"}}>{ message }</Alert>
         })
       }
-      <form onSubmit={this.handleSubmit}>
+      <form onSubmit={this.handleSubmit} style={{maxWidth: "960px", margin: "0 auto"}}>
 
         <div style={{marginBottom: '10px'}}>
           <TextField fullWidth label="Email address" placeholder="Enter your email address e.g. you@example.com" type="email" name="email" required={true} />

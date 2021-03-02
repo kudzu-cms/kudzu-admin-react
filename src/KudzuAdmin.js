@@ -55,10 +55,12 @@ class KudzuAdmin extends React.Component {
     return (
       <Page>
       <KudzuToolbar authStatus={this.state.authStatus} />
+      <div style={{margin: "0 1em"}}>
       <KudzuRouter
         contentTypes={this.state.contentTypes}
         authStatus={this.state.authStatus}
       />
+      </div>
       </Page>
     );
   }
