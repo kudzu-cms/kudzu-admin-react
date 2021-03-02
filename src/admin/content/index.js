@@ -112,6 +112,15 @@ function ContentListTable({contentList}) {
     return null;
   }
 
+  let timestampFormatter = Intl.DateTimeFormat("default", {
+    month: "numeric",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    timeZoneName: "short"
+  });
+
   return(
     <>
     <h1>Content</h1>
@@ -133,9 +142,8 @@ function ContentListTable({contentList}) {
                 <TableCell key={`${value.uuid}:uuid`} align="left">{ value.uuid }</TableCell>
                 <TableCell key={`${value.uuid}:id`} align="left">{ value.id }</TableCell>
                 <TableCell key={`${value.uuid}:slug`} align="left">{ value.slug }</TableCell>
-                {/* @todo Format timestamps. */}
-                <TableCell key={`${value.uuid}:timestamp`} align="left">{ value.timestamp }</TableCell>
-                <TableCell key={`${value.uuid}:updated`} align="left">{ value.updated }</TableCell>
+                <TableCell key={`${value.uuid}:timestamp`} align="left">{ timestampFormatter.format(value.timestamp) }</TableCell>
+                <TableCell key={`${value.uuid}:updated`} align="left">{ timestampFormatter.format(value.updated) }</TableCell>
                 {/* @todo Use a single split button, see https://material-ui.com/components/button-group/#split-button */}
                 <TableCell key={`${value.uuid}:edit`} align="left">
                   <Button color="primary" variant="contained" href={`/admin/content/edit/${value.uuid}`}>Edit</Button>
