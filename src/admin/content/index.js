@@ -29,98 +29,50 @@ const timestampFormatter = Intl.DateTimeFormat("default", {
   timeZoneName: "short"
 });
 
-class Content extends React.Component {
+function Content() {
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      contentTypes: [],
-      selectedType: "",
-      contentList: [],
-    };
+  const [selectedType, updateSelectedType] = useState("Test");
 
-    this.handleMenuClick = this.handleMenuClick.bind(this);
+  function handleMenuClick(name) {
+    updateSelectedType(name);
   }
 
-  componentDidMount() {
-    this.getContentTypes();
-  }
-
-  getContentOfType(type, successCallback) {
-    axios.get(`${KUDZU_BASE_URL}/api/contents?type=${type}`, {
-      withCredentials: false,
-    })
-    .then(response => {
-      console.log(response)
-      if (response.status === 200) {
-        if (typeof successCallback === "function") {
-          successCallback(response.data.data)
-        }
-      }
-    })
-    .catch(error => {
-      console.error(error)
-    })
-  }
-
-  getContentTypes() {
-    axios.get(`${KUDZU_BASE_URL}/admin/contents/meta`, {
-      withCredentials: true,
-    })
-    .then(response => {
-      console.log(response)
-      if (response.status === 200) {
-        let types = Object.keys(response.data)
-        this.setState({
-          contentTypes: types,
-          selectedType: types[0],
-        }, this.getContentOfType(types[0], (types) => {
-          this.setState({contentList: types})
-        }))
-      }
-    })
-    .catch(error => {
-      console.error(error)
-    })
-  }
-
-  handleMenuClick(event) {
-    let type = event.target.innerText;
-    this.setState({selectedType: type})
-    console.log(type)
-  }
-
-  render() {
-    if (this.state.contentTypes.length === 0) {
-      return null;
-    }
-
-    return (
-      <>
-      <Switch>
-        <Route exact={true} path="/admin/content">
-          <Grid container spacing={3}>
-            <Grid item xs={2}>
-              <Sidebar
-                contentTypes={this.state.contentTypes}
-                clickHandler={this.handleMenuClick}
-              />
-            </Grid>
-            <Grid item xs={9}>
-              <ContentListTable
-                contentList={this.state.contentList}
-                contentType={this.state.selectedType}
-              />
-            </Grid>
+  return (
+    <>
+    <Switch>
+      <Route exact={true} path="/admin/content">
+        <Grid container spacing={3}>
+          <Grid item xs={2}>
+            {/* <Sidebar
+              clickHandler={handleMenuClick}
+            /> */}
           </Grid>
-        </Route>
-        <Route path={`/admin/content/:type/:uuid/:action`}>
-          <ContentItem />
-        </Route>
-      </Switch>
-      </>
-    )
-  }
+          <Grid item xs={9}>
+            <ContentListTable
+              contentType={selectedType}
+            />
+          </Grid>
+        </Grid>
+      </Route>
+      <Route path={`/admin/content/:type/:uuid/:action`}>
+        <ContentItem />
+      </Route>
+    </Switch>
+    </>
+  )
+}
+
+
+function getContentTypes() {
+  return axios.get(`${KUDZU_BASE_URL}/admin/contents/meta`, {
+    withCredentials: true,
+  })
+}
+
+function getContentOfType(type) {
+  return axios.get(`${KUDZU_BASE_URL}/api/contents?type=${type}`, {
+    withCredentials: false,
+  })
 }
 
 function fetchContentItem(type, uuid) {
@@ -150,7 +102,7 @@ function ContentItemEdit({itemType, itemUuid}) {
   useEffect(() => {
     fetchContentItem(itemType, itemUuid)
     .then(response => {
-      console.log(response)
+      console.log("Edit", response)
       if (response.status === 200) {
         setItemData(response.data.data[0])
       }
@@ -198,22 +150,51 @@ function ContentItemDelete({itemType, itemUuid}) {
   return <h3>delete: {itemType}, {itemUuid}</h3>
 }
 
-function Sidebar({contentTypes, clickHandler}) {
+function Sidebar({clickHandler}) {
+  const [contentTypes, updateContentTypes] = useState([]);
+  useEffect(() => {
+    getContentTypes()
+    .then(response => {
+      console.log(response)
+      if (response.status === 200) {
+        let types = Object.keys(response.data)
+        console.log("Sidebar", types);
+        updateContentTypes(types)
+      }
+    })
+    .catch(error => {
+      console.error(error)
+    })
+  })
   return (
     <MenuList>
       { contentTypes.map(name => {
-          return <MenuItem key={name} onClick={clickHandler}>{ name }</MenuItem>
+          return <MenuItem key={name}
+          onClick={clickHandler(name)}
+          >
+          { name }
+          </MenuItem>
         })
       }
     </MenuList>
   )
 }
 
-function ContentListTable({contentList, contentType}) {
+function ContentListTable({contentType}) {
 
-  if (contentList.length === 0) {
-    return null;
-  }
+  const [contentList, updateContentList] = useState([{}]);
+  useEffect(() => {
+    getContentOfType(contentType)
+    .then(response => {
+      console.log("Table", response)
+      if (response.status === 200) {
+        updateContentList(response.data.data);
+      }
+    })
+    .catch(error => {
+      console.error(error)
+    })
+  }, [contentList[0].uuid, contentType])
 
   return(
     <>
