@@ -1,10 +1,12 @@
 import React from "react"
 import axios from "axios"
+import { Route, Switch, useParams, useRouteMatch } from "react-router-dom";
 
 import { KUDZU_BASE_URL } from "../../KudzuAdmin";
 import {
   Button,
   Grid,
+  Link,
   MenuItem,
   MenuList,
   Table,
@@ -74,28 +76,60 @@ class Content extends React.Component {
 
   render() {
     return (
-      <>
-      { this.state.contentTypes.length > 0 &&
+    <ContentWrapper
+      contentTypes={this.state.contentTypes}
+      contentList={this.state.contentList}
+      menuClickHandler={this.handleMenuClick}
+      selectedType={this.state.selectedType}
+     />
+    )
+  }
+
+}
+
+function ContentWrapper({contentTypes, contentList, menuClickHandler, selectedType}) {
+  let { path } = useRouteMatch();
+  return (
+    <>
+    <Switch>
+      <Route exact={true} path={path}>
+        { contentTypes.length > 0 ?
         <>
         <Grid container spacing={3}>
           <Grid item xs={2}>
             <Sidebar
-              contentTypes={this.state.contentTypes}
-              clickHandler={this.handleMenuClick}
+              contentTypes={contentTypes}
+              clickHandler={menuClickHandler}
             />
           </Grid>
           <Grid item xs={9}>
             <ContentListTable
-              contentList={this.state.contentList}
-              contentType={this.state.selectedType}
+              contentList={contentList}
+              contentType={selectedType}
             />
           </Grid>
         </Grid>
-        </>
-      }
-      </>
-    );
-  }
+        </> : null
+        }
+      </Route>
+      <Route path={`${path}/:type/:uuid/:action`}>
+        <ContentItem />
+      </Route>
+    </Switch>
+    </>
+  );
+}
+
+
+function ContentItem() {
+  let {type, uuid, action} = useParams();
+
+  return (
+    <>
+    <h3>Hello: {type}, {uuid}, {action}</h3>
+    <Link href="/admin/content">Back</Link>
+    </>
+  );
 }
 
 function Sidebar({contentTypes, clickHandler}) {

@@ -3,7 +3,7 @@ import {
   BrowserRouter,
   Switch,
   Route,
-  Redirect
+  Redirect,
 } from "react-router-dom";
 import axios from "axios";
 
@@ -101,7 +101,7 @@ function KudzuRouter({authStatus, contentTypes}) {
           <Users /> : <NoMatch authStatus={authStatus} />
         }
       </Route>
-      <Route path="/admin/content" exact={true}>
+      <Route path="/admin/content">
         { authStatus === KUDZU_AUTH_AUTHENTICATED ?
             <Content contentTypes={contentTypes} /> : <NoMatch authStatus={authStatus} />
         }
