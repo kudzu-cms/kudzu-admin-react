@@ -1,12 +1,12 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import axios from "axios"
-import { Route, Switch, useParams, useRouteMatch } from "react-router-dom";
+import { Route, Switch, useParams } from "react-router-dom";
+import { validate as uuidValidate } from 'uuid';
 
 import { KUDZU_BASE_URL } from "../../KudzuAdmin";
 import {
   Button,
   Grid,
-  Link,
   MenuItem,
   MenuList,
   Table,
@@ -15,7 +15,19 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
 } from "@material-ui/core";
+import NoMatch from "../../misc/no-match";
+
+const timestampFormatter = Intl.DateTimeFormat("default", {
+  month: "numeric",
+  day: "numeric",
+  year: "numeric",
+  hour: "numeric",
+  minute: "numeric",
+  second: "numeric",
+  timeZoneName: "short"
+});
 
 class Content extends React.Component {
 
@@ -34,14 +46,16 @@ class Content extends React.Component {
     this.getContentTypes();
   }
 
-  getContentOfType(type) {
+  getContentOfType(type, successCallback) {
     axios.get(`${KUDZU_BASE_URL}/api/contents?type=${type}`, {
       withCredentials: false,
     })
     .then(response => {
       console.log(response)
       if (response.status === 200) {
-        this.setState({contentList: response.data.data})
+        if (typeof successCallback === "function") {
+          successCallback(response.data.data)
+        }
       }
     })
     .catch(error => {
@@ -60,7 +74,9 @@ class Content extends React.Component {
         this.setState({
           contentTypes: types,
           selectedType: types[0],
-        }, this.getContentOfType(types[0]))
+        }, this.getContentOfType(types[0], (types) => {
+          this.setState({contentList: types})
+        }))
       }
     })
     .catch(error => {
@@ -75,61 +91,111 @@ class Content extends React.Component {
   }
 
   render() {
+    if (this.state.contentTypes.length === 0) {
+      return null;
+    }
+
     return (
-    <ContentWrapper
-      contentTypes={this.state.contentTypes}
-      contentList={this.state.contentList}
-      menuClickHandler={this.handleMenuClick}
-      selectedType={this.state.selectedType}
-     />
+      <>
+      <Switch>
+        <Route exact={true} path="/admin/content">
+          <Grid container spacing={3}>
+            <Grid item xs={2}>
+              <Sidebar
+                contentTypes={this.state.contentTypes}
+                clickHandler={this.handleMenuClick}
+              />
+            </Grid>
+            <Grid item xs={9}>
+              <ContentListTable
+                contentList={this.state.contentList}
+                contentType={this.state.selectedType}
+              />
+            </Grid>
+          </Grid>
+        </Route>
+        <Route path={`/admin/content/:type/:uuid/:action`}>
+          <ContentItem />
+        </Route>
+      </Switch>
+      </>
     )
   }
-
 }
 
-function ContentWrapper({contentTypes, contentList, menuClickHandler, selectedType}) {
-  let { path } = useRouteMatch();
-  return (
-    <>
-    <Switch>
-      <Route exact={true} path={path}>
-        { contentTypes.length > 0 ?
-        <>
-        <Grid container spacing={3}>
-          <Grid item xs={2}>
-            <Sidebar
-              contentTypes={contentTypes}
-              clickHandler={menuClickHandler}
-            />
-          </Grid>
-          <Grid item xs={9}>
-            <ContentListTable
-              contentList={contentList}
-              contentType={selectedType}
-            />
-          </Grid>
-        </Grid>
-        </> : null
-        }
-      </Route>
-      <Route path={`${path}/:type/:uuid/:action`}>
-        <ContentItem />
-      </Route>
-    </Switch>
-    </>
-  );
+function fetchContentItem(type, uuid) {
+  return axios.get(`${KUDZU_BASE_URL}/api/content?slug=${type}-${uuid}`, {
+    withCredentials: false,
+  })
 }
-
 
 function ContentItem() {
   let {type, uuid, action} = useParams();
 
+  if (typeof type !== "string" ||
+  !uuidValidate(uuid) ||
+  !['edit', 'delete'].includes(action)) {
+    return <NoMatch />
+  }
+
+  if (action === 'edit') {
+    return <ContentItemEdit itemType={type} itemUuid={uuid} />
+  }
+
+  return <ContentItemDelete itemType={type} itemUuid={uuid} />
+}
+
+function ContentItemEdit({itemType, itemUuid}) {
+  const [itemData, setItemData] = useState({});
+  useEffect(() => {
+    fetchContentItem(itemType, itemUuid)
+    .then(response => {
+      console.log(response)
+      if (response.status === 200) {
+        setItemData(response.data.data[0])
+      }
+    })
+    .catch(error => {
+      console.error(error)
+    })
+  }, [itemType, itemUuid, itemData.uuid])
+
+  if (!itemData["uuid"]) {
+    return null;
+  }
+
+  let uuid, id, slug, timestamp, updated, rest;
+  ({uuid, id, slug, timestamp, updated, ...rest} = itemData);
+
   return (
-    <>
-    <h3>Hello: {type}, {uuid}, {action}</h3>
-    <Link href="/admin/content">Back</Link>
-    </>
-  );
+  <>
+  <form>
+  <Grid container spacing={3}>
+    <Grid item xs={3}></Grid>
+    <Grid item xs={6}>
+      <Button color="primary" href="/admin/content">{'< Back'}</Button>
+      <h1>{rest.title}</h1>
+      <TextField defaultValue={rest.title} fullWidth label={"Title"}>{rest.title}</TextField>
+    </Grid>
+    <Grid item xs={3}>
+      <h3>Locked fields</h3>
+      <TextField value={uuid} fullWidth disabled label={'UUID'} />
+      <TextField value={id} fullWidth disabled label={'ID'} />
+      <TextField value={slug} fullWidth disabled label={'Slug'} />
+      <TextField value={timestampFormatter.format(timestamp)} fullWidth disabled label={'Created'} />
+      <TextField value={timestampFormatter.format(updated)} fullWidth disabled label={'Updated'} />
+      <h3>Actions</h3>
+      <Button color="primary" variant="contained">Save</Button>&nbsp;
+      <Button color="secondary" variant="contained" href={`/admin/content/${itemType.toLowerCase()}/${itemUuid}/delete`}>Delete</Button>
+    </Grid>
+  </Grid>
+  </form>
+  </>
+  )
+}
+
+function ContentItemDelete({itemType, itemUuid}) {
+  return <h3>delete: {itemType}, {itemUuid}</h3>
 }
 
 function Sidebar({contentTypes, clickHandler}) {
@@ -148,15 +214,6 @@ function ContentListTable({contentList, contentType}) {
   if (contentList.length === 0) {
     return null;
   }
-
-  let timestampFormatter = Intl.DateTimeFormat("default", {
-    month: "numeric",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    timeZoneName: "short"
-  });
 
   return(
     <>
