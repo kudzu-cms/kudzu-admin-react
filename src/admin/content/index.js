@@ -34,6 +34,7 @@ function Content() {
   const [selectedType, updateSelectedType] = useState("Test");
 
   function handleMenuClick(name) {
+    console.log('Menu click:', name);
     updateSelectedType(name);
   }
 
@@ -43,9 +44,9 @@ function Content() {
       <Route exact={true} path="/admin/content">
         <Grid container spacing={3}>
           <Grid item xs={2}>
-            {/* <Sidebar
+            <Sidebar
               clickHandler={handleMenuClick}
-            /> */}
+            />
           </Grid>
           <Grid item xs={9}>
             <ContentListTable
@@ -112,7 +113,7 @@ function ContentItemEdit({itemType, itemUuid}) {
     })
   }, [itemType, itemUuid, itemData.uuid])
 
-  if (!itemData["uuid"]) {
+  if (!itemData.uuid) {
     return null;
   }
 
@@ -165,12 +166,12 @@ function Sidebar({clickHandler}) {
     .catch(error => {
       console.error(error)
     })
-  })
+  }, [clickHandler, contentTypes.length])
   return (
     <MenuList>
       { contentTypes.map(name => {
           return <MenuItem key={name}
-          onClick={clickHandler(name)}
+          onClick={() => clickHandler(name)}
           >
           { name }
           </MenuItem>
@@ -195,6 +196,10 @@ function ContentListTable({contentType}) {
       console.error(error)
     })
   }, [contentList[0].uuid, contentType])
+
+  if (!contentList[0].uuid) {
+    return null;
+  }
 
   return(
     <>
