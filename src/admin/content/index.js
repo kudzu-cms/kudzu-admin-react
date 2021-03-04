@@ -183,21 +183,21 @@ function Sidebar({clickHandler}) {
 
 function ContentListTable({contentType}) {
 
-  const [contentList, updateContentList] = useState([{}]);
+  const [contentList, dispatch] = useReducer((state, action) => { return action.payload }, [])
   useEffect(() => {
     getContentOfType(contentType)
     .then(response => {
       console.log("Table", response)
       if (response.status === 200) {
-        updateContentList(response.data.data);
+        dispatch({type: "update", payload: response.data.data})
       }
     })
     .catch(error => {
       console.error(error)
     })
-  }, [contentList[0].uuid, contentType])
+  }, [contentType, dispatch])
 
-  if (!contentList[0].uuid) {
+  if (contentList.length === 0) {
     return null;
   }
 
