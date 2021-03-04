@@ -55,8 +55,11 @@ function Content() {
           </Grid>
         </Grid>
       </Route>
+      <Route path={`/admin/content/:type/create`}>
+        <ContentItemCreate />
+      </Route>
       <Route path={`/admin/content/:type/:uuid/:action`}>
-        <ContentItem />
+        <ContentItemModify />
       </Route>
     </Switch>
     </>
@@ -82,7 +85,12 @@ function fetchContentItem(type, uuid) {
   })
 }
 
-function ContentItem() {
+function ContentItemCreate() {
+  let {type} = useParams();
+  return <h3>create: {type}</h3>
+}
+
+function ContentItemModify() {
   let {type, uuid, action} = useParams();
 
   if (typeof type !== "string" ||
@@ -204,6 +212,7 @@ function ContentListTable({contentType}) {
   return(
     <>
     <h1>Content</h1>
+    <Button href={`/admin/content/${contentType.toLowerCase()}/create`}>{`Create ${contentType.toLowerCase()}`}</Button>
     <TableContainer>
     <Table size="small">
       <TableHead>
