@@ -99,19 +99,19 @@ function ContentItem() {
 }
 
 function ContentItemEdit({itemType, itemUuid}) {
-  const [itemData, setItemData] = useState({});
+  const [itemData, dispatch] = useReducer((state, action) => { return action.payload }, {})
   useEffect(() => {
     fetchContentItem(itemType, itemUuid)
     .then(response => {
       console.log("Edit", response)
       if (response.status === 200) {
-        setItemData(response.data.data[0])
+        dispatch({type: "update", payload: response.data.data[0]})
       }
     })
     .catch(error => {
       console.error(error)
     })
-  }, [itemType, itemUuid, itemData.uuid])
+  }, [itemType, itemUuid, dispatch])
 
   if (!itemData.uuid) {
     return null;
