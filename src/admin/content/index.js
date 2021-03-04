@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useReducer, useState } from "react"
 import axios from "axios"
 import { Route, Switch, useParams } from "react-router-dom";
 import { validate as uuidValidate } from 'uuid';
@@ -152,7 +152,7 @@ function ContentItemDelete({itemType, itemUuid}) {
 }
 
 function Sidebar({clickHandler}) {
-  const [contentTypes, updateContentTypes] = useState([]);
+  const [types, dispatch] = useReducer((state, action) => { return action.payload }, [])
   useEffect(() => {
     getContentTypes()
     .then(response => {
@@ -160,16 +160,16 @@ function Sidebar({clickHandler}) {
       if (response.status === 200) {
         let types = Object.keys(response.data)
         console.log("Sidebar", types);
-        updateContentTypes(types)
+        dispatch({type: "update", payload: types})
       }
     })
     .catch(error => {
       console.error(error)
     })
-  }, [clickHandler, contentTypes.length])
+  }, [dispatch])
   return (
     <MenuList>
-      { contentTypes.map(name => {
+      { types.map(name => {
           return <MenuItem key={name}
           onClick={() => clickHandler(name)}
           >
