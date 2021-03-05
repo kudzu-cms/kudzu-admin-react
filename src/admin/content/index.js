@@ -1,12 +1,13 @@
-import React, { useEffect, useReducer, useState } from "react"
+import React, { useEffect, useReducer } from "react"
 import axios from "axios"
-import { Route, Switch, useParams } from "react-router-dom";
+import { Redirect, Route, Switch, useParams } from "react-router-dom";
 import { validate as uuidValidate } from 'uuid';
 
 import { KUDZU_BASE_URL } from "../../KudzuAdmin";
 import {
   Button,
   Grid,
+  Link,
   MenuItem,
   MenuList,
   Table,
@@ -31,27 +32,19 @@ const timestampFormatter = Intl.DateTimeFormat("default", {
 
 function Content() {
 
-  const [selectedType, updateSelectedType] = useState("Test");
-
-  function handleMenuClick(name) {
-    console.log('Menu click:', name);
-    updateSelectedType(name);
-  }
-
   return (
     <>
     <Switch>
-      <Route exact={true} path="/admin/content">
+    <Route exact={true} path="/admin/content">
+      <Redirect to="/admin/content/test" />
+    </Route>
+      <Route exact={true} path="/admin/content/:type">
         <Grid container spacing={3}>
           <Grid item xs={2}>
-            <Sidebar
-              clickHandler={handleMenuClick}
-            />
+            <Sidebar />
           </Grid>
           <Grid item xs={9}>
-            <ContentListTable
-              contentType={selectedType}
-            />
+            <ContentListTable />
           </Grid>
         </Grid>
       </Route>
@@ -88,7 +81,7 @@ function fetchContentItem(type, uuid) {
 function handleContentCreateSubmit(event, type, editable) {
   event.preventDefault();
   const formData = new FormData();
-  Object.keys(editable).map(key => {
+  Object.keys(editable).forEach(key => {
     if (event.target[key]) {
       formData.append(key, event.target[key].value);
     }
@@ -102,7 +95,7 @@ function handleContentCreateSubmit(event, type, editable) {
   .then((response) => {
     console.log(response);
     if (response.status === 200 && response.data.data[0].id) {
-      window.location = '/admin/content';
+      window.location = `/admin/content/${type.toLowerCase()}`;;
     }
   })
   .catch((error) => {
@@ -124,7 +117,7 @@ function ContentItemCreate() {
     .catch(error => {
       console.error(error)
     })
-  }, [type, dispatch])
+  }, [type, externalType, dispatch])
 
   if (Object.keys(metadata) === 0) {
     return null;
@@ -197,7 +190,7 @@ function ContentItemModify() {
 function handleContentEditSubmit(event, type, id, editable) {
   event.preventDefault();
   const formData = new FormData();
-  Object.keys(editable).map(key => {
+  Object.keys(editable).forEach(key => {
     if (event.target[key]) {
       formData.append(key, event.target[key].value);
     }
@@ -211,7 +204,7 @@ function handleContentEditSubmit(event, type, id, editable) {
   .then((response) => {
     console.log(response);
     if (response.status === 200 && response.data.data[0].id) {
-      window.location = '/admin/content';
+      window.location = `/admin/content/${type.toLowerCase()}`;
     }
   })
   .catch((error) => {
@@ -256,7 +249,7 @@ function ContentItemEdit({itemType, itemUuid}) {
     <Grid item xs={3}></Grid>
     <Grid item xs={6}>
       <Button color="primary" href="/admin/content">{'< Back'}</Button>
-      <h1>{rest.title}</h1>
+      <h1>Edit {rest.title}</h1>
       { editableFields.map((field, index) => {
         let fieldName = field[0];
         let fieldValue = field[1];
@@ -298,7 +291,7 @@ function handleContentDeleteSubmit(event, type, id) {
   .then((response) => {
     console.log(response);
     if (response.status === 200 && response.data.data[0].id) {
-      window.location = '/admin/content';
+      window.location = `/admin/content/${type.toLowerCase()}`;
     }
   })
   .catch((error) => {
@@ -367,22 +360,18 @@ function Sidebar({clickHandler}) {
   return (
     <MenuList>
       { types.map(name => {
-          return <MenuItem key={name}
-          onClick={() => clickHandler(name)}
-          >
-          { name }
-          </MenuItem>
-        })
+          return <Link href={`/admin/content/${name.toLowerCase()}`} key={name}><MenuItem>{name}</MenuItem></Link>})
       }
     </MenuList>
   )
 }
 
-function ContentListTable({contentType}) {
-
+function ContentListTable() {
+  let {type} = useParams();
+  let externalType = type.charAt(0).toUpperCase() + type.slice(1);
   const [contentList, dispatch] = useReducer((state, action) => { return action.payload }, [])
   useEffect(() => {
-    getContentOfType(contentType)
+    getContentOfType(externalType)
     .then(response => {
       console.log("Table", response)
       if (response.status === 200) {
@@ -392,16 +381,22 @@ function ContentListTable({contentType}) {
     .catch(error => {
       console.error(error)
     })
-  }, [contentType, dispatch])
+  }, [externalType, dispatch])
 
   if (contentList.length === 0) {
-    return null;
+    return (
+      <>
+      <h1>Content</h1>
+      No {externalType} content has been created:
+      <Button href={`/admin/content/${type}/create`}>{`Create ${type}`}</Button>
+      </>
+    );
   }
 
   return(
     <>
     <h1>Content</h1>
-    <Button href={`/admin/content/${contentType.toLowerCase()}/create`}>{`Create ${contentType.toLowerCase()}`}</Button>
+    <Button href={`/admin/content/${type}/create`}>Create {type}</Button>
     <TableContainer>
     <Table size="small">
       <TableHead>
@@ -424,10 +419,10 @@ function ContentListTable({contentType}) {
                 <TableCell key={`${value.uuid}:updated`} align="left">{ timestampFormatter.format(value.updated) }</TableCell>
                 {/* @todo Use a single split button, see https://material-ui.com/components/button-group/#split-button */}
                 <TableCell key={`${value.uuid}:edit`} align="left">
-                  <Button color="primary" variant="contained" href={`/admin/content/${contentType.toLowerCase()}/${value.uuid}/edit`}>Edit</Button>
+                  <Button color="primary" variant="contained" href={`/admin/content/${type}/${value.uuid}/edit`}>Edit</Button>
                 </TableCell>
                 <TableCell key={`${value.uuid}:delete`} align="left">
-                  <Button color="secondary" variant="contained" href={`/admin/content/${contentType.toLowerCase()}/${value.uuid}/delete`}>Delete</Button>
+                  <Button color="secondary" variant="contained" href={`/admin/content/${type}/${value.uuid}/delete`}>Delete</Button>
                 </TableCell>
               </TableRow>
             )
