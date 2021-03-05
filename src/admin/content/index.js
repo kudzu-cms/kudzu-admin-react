@@ -68,7 +68,7 @@ function Content() {
 
 
 function getContentTypes() {
-  return axios.get(`${KUDZU_BASE_URL}/admin/contents/meta`, {
+  return axios.get(`${KUDZU_BASE_URL}/api/contents/meta`, {
     withCredentials: true,
   })
 }
@@ -97,11 +97,11 @@ function handleContentCreateSubmit(event, type, editable) {
     headers: {
       'Content-Type': 'multipart/form-data'
     },
-    withCredentials: false,
+    withCredentials: true,
   })
   .then((response) => {
     console.log(response);
-    if (response.status === 200) {
+    if (response.status === 200 && response.data.data[0].id) {
       window.location = '/admin/content';
     }
   })
