@@ -75,7 +75,7 @@ function ContentItemCreate() {
     <Grid container spacing={3}>
       <Grid item xs={3}></Grid>
       <Grid item xs={6}>
-        <Button color="primary" href="/admin/content">{'< Back'}</Button>
+        <Button color="primary" href={`/admin/content/${type}`}>{'< Back'}</Button>
         <h1>New {type}</h1>
         { editableFields.map((field, index) => {
           let fieldName = field[0];

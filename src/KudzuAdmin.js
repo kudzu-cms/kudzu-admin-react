@@ -13,6 +13,7 @@ import Users from "./admin/users";
 import NoMatch from "./misc/no-match";
 import Page from "./layout/page";
 import { AppBar, Button, Toolbar } from "@material-ui/core";
+import Init from "./admin/init";
 
 const KUDZU_BASE_URL = process.env.REACT_APP_KUDZU_BASE_URL;
 const KUDZU_AUTH_PENDING = "pending";
@@ -26,6 +27,7 @@ class KudzuAdmin extends React.Component {
 
     this.state = {
       authStatus: KUDZU_AUTH_PENDING,
+      initialized: false
     };
   }
 
@@ -33,17 +35,20 @@ class KudzuAdmin extends React.Component {
     this.checkIsAuthenticated();
   }
 
-  checkIsAuthenticated(successCallback) {
+  checkIsAuthenticated() {
     axios.get(`${KUDZU_BASE_URL}/admin/login`, {
       withCredentials: true,
     })
     .then(response => {
       console.log(response)
-      if (response.data.success === true) {
-        this.setState({authStatus: KUDZU_AUTH_AUTHENTICATED})
-        return;
+      if (response.status === 200) {
+        this.setState({initialized: true})
+        if (response.data.success === true) {
+          this.setState({authStatus: KUDZU_AUTH_AUTHENTICATED})
+          return;
+        }
+        this.setState({authStatus: KUDZU_AUTH_UNAUTHENTICATED})
       }
-      this.setState({authStatus: KUDZU_AUTH_UNAUTHENTICATED})
     })
     .catch(error => {
       console.error(error)
@@ -54,11 +59,15 @@ class KudzuAdmin extends React.Component {
   render() {
     return (
       <Page>
-      <KudzuToolbar authStatus={this.state.authStatus} />
+      <KudzuToolbar
+        authStatus={this.state.authStatus}
+        initStatus={this.state.initialized}
+        />
       <div style={{margin: "0 1em"}}>
       <KudzuRouter
         contentTypes={this.state.contentTypes}
         authStatus={this.state.authStatus}
+        initStatus={this.state.initialized}
       />
       </div>
       </Page>
@@ -66,11 +75,11 @@ class KudzuAdmin extends React.Component {
   }
 }
 
-function KudzuToolbar({authStatus}) {
+function KudzuToolbar({authStatus, initStatus}) {
   return (
     <AppBar position="static">
     <Toolbar variant="dense">
-      { authStatus === KUDZU_AUTH_UNAUTHENTICATED &&
+      { initStatus === true && authStatus === KUDZU_AUTH_UNAUTHENTICATED &&
         <Button key="login" href="/login">Login</Button>
       }
       { authStatus === KUDZU_AUTH_AUTHENTICATED &&
@@ -84,11 +93,22 @@ function KudzuToolbar({authStatus}) {
   )
 }
 
-function KudzuRouter({authStatus, contentTypes}) {
+function KudzuRouter({authStatus, initStatus, contentTypes}) {
   return (
     <BrowserRouter>
     <Switch>
+      <Route path="/" exact={true}>
+        {
+          !initStatus ? <Redirect to="/init" /> : <Redirect to="/login" />
+        }
+      </Route>
+      <Route path="/init" exact={true}>
+        <Init />
+      </Route>
       <Route path="/login" exact={true}>
+        {
+          !initStatus && <Redirect to="/init" />
+        }
         { authStatus === KUDZU_AUTH_UNAUTHENTICATED &&
           <Login />
         }
