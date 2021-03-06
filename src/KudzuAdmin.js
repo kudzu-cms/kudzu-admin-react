@@ -68,13 +68,13 @@ class KudzuAdmin extends React.Component {
       <Page>
       <KudzuToolbar
         authStatus={this.state.authStatus}
-        initStatus={this.state.initialized}
+        initStatus={this.state.initStatus}
         />
       <div style={{margin: "0 1em"}}>
       <KudzuRouter
         contentTypes={this.state.contentTypes}
         authStatus={this.state.authStatus}
-        initStatus={this.state.initialized}
+        initStatus={this.state.initStatus}
       />
       </div>
       </Page>
@@ -86,7 +86,7 @@ function KudzuToolbar({authStatus, initStatus}) {
   return (
     <AppBar position="static">
     <Toolbar variant="dense">
-      { initStatus === true && authStatus === KUDZU_AUTH_UNAUTHENTICATED &&
+      { initStatus === KUDZU_INIT_COMPLETE && authStatus === KUDZU_AUTH_UNAUTHENTICATED &&
         <Button key="login" href="/login">Login</Button>
       }
       { authStatus === KUDZU_AUTH_AUTHENTICATED &&
@@ -101,20 +101,23 @@ function KudzuToolbar({authStatus, initStatus}) {
 }
 
 function KudzuRouter({authStatus, initStatus, contentTypes}) {
+  console.log(initStatus)
   return (
     <BrowserRouter>
     <Switch>
       <Route path="/" exact={true}>
         {
-          !initStatus ? <Redirect to="/init" /> : <Redirect to="/login" />
+          initStatus === KUDZU_INIT_INCOMPLETE ? <Redirect to="/init" /> : <Redirect to="/login" />
         }
       </Route>
       <Route path="/init" exact={true}>
-        <Init />
+        {
+          initStatus === KUDZU_INIT_INCOMPLETE ? <Init /> : <Redirect to="/" />
+        }
       </Route>
       <Route path="/login" exact={true}>
         {
-          initStatus === false && <Redirect to="/init" />
+          initStatus === KUDZU_INIT_INCOMPLETE && <Redirect to="/init" />
         }
         { authStatus === KUDZU_AUTH_UNAUTHENTICATED &&
           <Login />
