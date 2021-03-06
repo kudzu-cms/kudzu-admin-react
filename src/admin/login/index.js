@@ -21,7 +21,7 @@ class  Login extends React.Component {
       password: event.target.password.value
     };
     this.setState({messages: []});
-    axios.post(`${KUDZU_BASE_URL}/admin/login`, qs.stringify(data), {
+    axios.post(`${KUDZU_BASE_URL}/api/user/login`, qs.stringify(data), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
       },

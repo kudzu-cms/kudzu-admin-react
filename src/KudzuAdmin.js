@@ -114,7 +114,7 @@ function KudzuRouter({authStatus, initStatus, contentTypes}) {
       </Route>
       <Route path="/login" exact={true}>
         {
-          !initStatus && <Redirect to="/init" />
+          initStatus === false && <Redirect to="/init" />
         }
         { authStatus === KUDZU_AUTH_UNAUTHENTICATED &&
           <Login />
