@@ -20,6 +20,10 @@ const KUDZU_AUTH_PENDING = "pending";
 const KUDZU_AUTH_AUTHENTICATED = "authenticated";
 const KUDZU_AUTH_UNAUTHENTICATED = "unauthenticated";
 
+const KUDZU_INIT_PENDING = "pending"
+const KUDZU_INIT_COMPLETE = "complete"
+const KUDZU_INIT_INCOMPLETE = "incomplete"
+
 class KudzuAdmin extends React.Component {
 
   constructor(props) {
@@ -27,7 +31,7 @@ class KudzuAdmin extends React.Component {
 
     this.state = {
       authStatus: KUDZU_AUTH_PENDING,
-      initialized: false
+      initStatus: KUDZU_INIT_PENDING
     };
   }
 
@@ -36,13 +40,13 @@ class KudzuAdmin extends React.Component {
   }
 
   checkIsAuthenticated() {
-    axios.get(`${KUDZU_BASE_URL}/admin/login`, {
+    axios.get(`${KUDZU_BASE_URL}/api/user/login`, {
       withCredentials: true,
     })
     .then(response => {
       console.log(response)
       if (response.status === 200) {
-        this.setState({initialized: true})
+        this.setState({initStatus: KUDZU_INIT_COMPLETE})
         if (response.data.success === true) {
           this.setState({authStatus: KUDZU_AUTH_AUTHENTICATED})
           return;
@@ -52,7 +56,10 @@ class KudzuAdmin extends React.Component {
     })
     .catch(error => {
       console.error(error)
-      this.setState({authStatus: KUDZU_AUTH_UNAUTHENTICATED})
+      this.setState({
+        authStatus: KUDZU_AUTH_UNAUTHENTICATED,
+        initStatus: KUDZU_INIT_INCOMPLETE,
+      })
     })
   }
 
