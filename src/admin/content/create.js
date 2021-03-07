@@ -2,11 +2,14 @@
 import React, { useEffect, useReducer } from "react"
 import axios from "axios"
 import { useParams } from "react-router-dom";
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 import { KUDZU_BASE_URL } from "../../KudzuAdmin";
 import {
   Button,
   Grid,
+  TextareaAutosize,
   TextField,
 } from "@material-ui/core";
 import { fetchContentTypes } from "./fetch";
@@ -69,6 +72,7 @@ function ContentItemCreate() {
     editableFields.push([name, type]);
   }
 
+  let textareaRef = null
   return (
     <>
     <form onSubmit={event => { handleContentCreateSubmit(event, externalType, rest) }}>
@@ -80,9 +84,36 @@ function ContentItemCreate() {
         { editableFields.map((field, index) => {
           let fieldName = field[0];
           let fieldType = field[1];
-          switch (fieldType) {
+          switch ('string:rich') {
             case 'string':
               return <TextField key={`${fieldName}:${index}`} name={fieldName} fullWidth label={fieldName}/>
+            case 'string:rich':
+              return (
+                <>
+                <CKEditor
+                    key={`${fieldName}:rich:${index}`}
+                    editor={ ClassicEditor }
+                    data=""
+                    onChange={(event, editor) => {
+                      const data = editor.getData();
+                      if (textareaRef) {
+                        textareaRef.value = data;
+                        return
+                      }
+                      let currentElement = editor.sourceElement
+                      while (currentElement) {
+                        if (currentElement.nodeName === "TEXTAREA") {
+                          break;
+                        }
+                        currentElement = currentElement.nextElementSibling;
+                      }
+                      textareaRef = currentElement
+                      textareaRef.value = data;
+                  }}
+                />
+                <TextareaAutosize key={`${fieldName}:${index}`} name={fieldName} label={fieldName} hidden />
+                </>
+              )
             default:
               throw new Error(`Unknown field type: ${fieldType}`);
           }
