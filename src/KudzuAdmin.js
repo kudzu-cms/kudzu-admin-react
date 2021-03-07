@@ -55,10 +55,11 @@ class KudzuAdmin extends React.Component {
       }
     })
     .catch(error => {
-      console.error(error)
+      console.error(error.response)
       this.setState({
         authStatus: KUDZU_AUTH_UNAUTHENTICATED,
-        initStatus: KUDZU_INIT_INCOMPLETE,
+        // 401 indicates the system is ready but the user is unauthenticated.
+        initStatus: error.response.status === 401 ? KUDZU_INIT_COMPLETE : KUDZU_INIT_INCOMPLETE,
       })
     })
   }

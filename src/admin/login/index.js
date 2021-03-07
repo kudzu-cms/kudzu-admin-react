@@ -43,13 +43,13 @@ class  Login extends React.Component {
 
   render() {
     return (
-      <>
+      <div style={{maxWidth: "960px", margin: "0 auto"}}>
       <h1>Login</h1>
       { this.state.messages.map(message => {
           return <Alert severity="error" style={{marginBottom: "5px"}}>{ message }</Alert>
         })
       }
-      <form onSubmit={this.handleSubmit} style={{maxWidth: "960px", margin: "0 auto"}}>
+      <form onSubmit={this.handleSubmit}>
 
         <div style={{marginBottom: '10px'}}>
           <TextField fullWidth label="Email address" placeholder="Enter your email address e.g. you@example.com" type="email" name="email" required={true} />
@@ -68,7 +68,7 @@ class  Login extends React.Component {
           </Button>
         </div>
       </form>
-      </>
+      </div>
     )
   }
 }

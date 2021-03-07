@@ -51,7 +51,7 @@ function handleSubmit(event) {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
     },
-    withCredentials: false,
+    withCredentials: true,
   })
   .then((response) => {
     console.log(response);
