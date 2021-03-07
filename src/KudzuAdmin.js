@@ -12,7 +12,7 @@ import Login from "./admin/login";
 import Users from "./admin/users";
 import NoMatch from "./misc/no-match";
 import Page from "./layout/page";
-import { AppBar, Button, Grid, Toolbar } from "@material-ui/core";
+import { AppBar, Button, createMuiTheme, Grid, ThemeProvider, Toolbar } from "@material-ui/core";
 import Init from "./admin/init";
 
 const KUDZU_BASE_URL = process.env.REACT_APP_KUDZU_BASE_URL;
@@ -23,6 +23,14 @@ const KUDZU_AUTH_UNAUTHENTICATED = "unauthenticated";
 const KUDZU_INIT_PENDING = "pending"
 const KUDZU_INIT_COMPLETE = "complete"
 const KUDZU_INIT_INCOMPLETE = "incomplete"
+
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#26a69a',
+    }
+  }
+})
 
 class KudzuAdmin extends React.Component {
 
@@ -66,6 +74,7 @@ class KudzuAdmin extends React.Component {
 
   render() {
     return (
+      <ThemeProvider theme={theme}>
       <Page>
       <KudzuToolbar
         authStatus={this.state.authStatus}
@@ -79,6 +88,7 @@ class KudzuAdmin extends React.Component {
       />
       </div>
       </Page>
+      </ThemeProvider>
     );
   }
 }
