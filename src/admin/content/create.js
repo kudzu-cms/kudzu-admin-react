@@ -14,6 +14,7 @@ import {
 } from "@material-ui/core";
 import { fetchContentTypes } from "./fetch";
 import { timestampFormatter } from "./helpers"
+import kudzuConfig from "../../kudzu.config"
 
 function handleContentCreateSubmit(event, type, editable) {
   event.preventDefault();
@@ -84,10 +85,13 @@ function ContentItemCreate() {
         { editableFields.map((field, index) => {
           let fieldName = field[0];
           let fieldType = field[1];
-          switch ('string:rich') {
+          if (kudzuConfig?.types[externalType]?.fields[fieldName]?.editor) {
+            fieldType = kudzuConfig.types[externalType].fields[fieldName].editor;
+          }
+          switch (fieldType) {
             case 'string':
               return <TextField key={`${fieldName}:${index}`} name={fieldName} fullWidth label={fieldName}/>
-            case 'string:rich':
+            case 'string:richtext':
               return (
                 <>
                 <CKEditor

@@ -7,10 +7,11 @@ import {
   TextareaAutosize,
   TextField,
 } from "@material-ui/core";
-import { fetchContentItem} from "./fetch";
+import { fetchContentItem, fetchContentTypes} from "./fetch";
 import { timestampFormatter } from "./helpers"
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import kudzuConfig from "../../kudzu.config"
 
 function handleContentEditSubmit(event, type, id, editable) {
   event.preventDefault();
@@ -38,29 +39,39 @@ function handleContentEditSubmit(event, type, id, editable) {
 }
 
 function ContentItemEdit({itemType, itemUuid}) {
-  const [itemData, dispatch] = useReducer((state, action) => { return action.payload }, {})
+  const [itemData, dispatchItem] = useReducer((state, action) => { return action.payload }, {})
   useEffect(() => {
     fetchContentItem(itemType, itemUuid)
     .then(response => {
-      console.log("Edit", response)
       if (response.status === 200) {
-        dispatch({type: "update", payload: response.data.data[0]})
+        dispatchItem({type: "update", payload: response.data.data[0]})
       }
     })
     .catch(error => {
       console.error(error)
     })
-  }, [itemType, itemUuid, dispatch])
+  }, [itemType, itemUuid, dispatchItem])
 
-  if (!itemData.uuid) {
+  let externalType = itemType.charAt(0).toUpperCase() + itemType.slice(1);
+  const [metadata, dispatchMetadata] = useReducer((state, action) => { return action.payload }, {})
+  useEffect(() => {
+    fetchContentTypes(itemType)
+    .then(response => {
+      if (response.status === 200) {
+        dispatchMetadata({type: "update", payload: response.data[externalType]})
+      }
+    })
+    .catch(error => {
+      console.error(error)
+    })
+  }, [itemType, externalType, dispatchMetadata])
+
+  if (!itemData.uuid || Object.keys(metadata).length === 0) {
     return null;
   }
 
   let uuid, id, slug, timestamp, updated, rest;
   ({uuid, id, slug, timestamp, updated, ...rest} = itemData);
-
-  let type = slug.slice(0, slug.indexOf('-'))
-  let externalType = type.charAt(0).toUpperCase() + type.slice(1);
 
   let editableFields = [];
   for (const [name, value] of Object.entries(rest)) {
@@ -74,15 +85,20 @@ function ContentItemEdit({itemType, itemUuid}) {
   <Grid container spacing={3}>
     <Grid item xs={3}></Grid>
     <Grid item xs={6}>
-      <Button color="primary" href={`/admin/content/${type}`}>{'< Back'}</Button>
+      <Button color="primary" href={`/admin/content/${itemType}`}>{'< Back'}</Button>
       <h1>Edit {rest.title}</h1>
       { editableFields.map((field, index) => {
         let fieldName = field[0];
         let fieldValue = field[1];
-        switch ('string:rich') {
+        let externalFieldName = fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
+        let fieldType = metadata[externalFieldName]
+        if (kudzuConfig?.types[externalType]?.fields[externalFieldName]?.editor) {
+          fieldType = kudzuConfig.types[externalType].fields[externalFieldName].editor;
+        }
+        switch (fieldType) {
           case 'string':
             return <TextField defaultValue={fieldValue} key={`${fieldName}:${index}`} name={fieldName} fullWidth label={fieldName}/>
-          case 'string:rich':
+        case 'string:richtext':
             return (
               <>
               <CKEditor
@@ -110,7 +126,7 @@ function ContentItemEdit({itemType, itemUuid}) {
               </>
             )
           default:
-            throw new Error(`Unknown field type: ${'fieldType'}`);
+            throw new Error(`Unknown field type: ${fieldType}`);
         }
         })
       }
