@@ -12,7 +12,7 @@ import Login from "./admin/login";
 import Users from "./admin/users";
 import NoMatch from "./misc/no-match";
 import Page from "./layout/page";
-import { AppBar, Button, Toolbar } from "@material-ui/core";
+import { AppBar, Button, Grid, Toolbar } from "@material-ui/core";
 import Init from "./admin/init";
 
 const KUDZU_BASE_URL = process.env.REACT_APP_KUDZU_BASE_URL;
@@ -87,15 +87,24 @@ function KudzuToolbar({authStatus, initStatus}) {
   return (
     <AppBar position="static">
     <Toolbar variant="dense">
-      { initStatus === KUDZU_INIT_COMPLETE && authStatus === KUDZU_AUTH_UNAUTHENTICATED &&
-        <Button key="login" href="/login">Login</Button>
-      }
-      { authStatus === KUDZU_AUTH_AUTHENTICATED &&
-        <>
-        <Button key="admin:content" href="/admin/content">Content</Button>
-        <Button key="admin:users" href="/admin/users">Users</Button>
-        </>
-      }
+    <Grid container spacing={3}>
+      <Grid item xs={11}>
+        { authStatus === KUDZU_AUTH_AUTHENTICATED &&
+          <>
+          <Button key="admin:content" href="/admin/content">Content</Button>
+          <Button key="admin:users" href="/admin/users">Users</Button>
+          </>
+        }
+      </Grid>
+      <Grid item xs={1}>
+        { initStatus === KUDZU_INIT_COMPLETE && authStatus === KUDZU_AUTH_UNAUTHENTICATED &&
+          <Button key="admin:login" href="/login">Login</Button>
+        }
+        { authStatus === KUDZU_AUTH_AUTHENTICATED &&
+          <Button key="admin:logout" onClick={handleLogout}>Logout</Button>
+        }
+      </Grid>
+    </Grid>
     </Toolbar>
   </AppBar>
   )
@@ -143,6 +152,22 @@ function KudzuRouter({authStatus, initStatus, contentTypes}) {
     </Switch>
   </BrowserRouter>
   )
+}
+
+function handleLogout(event) {
+  event.preventDefault();
+  axios.post(`${KUDZU_BASE_URL}/api/user/logout`, {}, {
+    withCredentials: true,
+  })
+  .then((response) => {
+    console.log(response);
+    if (response.status === 200) {
+      window.location = '/';
+    }
+  })
+  .catch((error) => {
+    console.log(error)
+  });
 }
 
 export {
