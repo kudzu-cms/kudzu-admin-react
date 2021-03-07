@@ -16,9 +16,9 @@ import kudzuConfig from "../../kudzu.config"
 function handleContentEditSubmit(event, type, id, editable) {
   event.preventDefault();
   const formData = new FormData();
-  Object.keys(editable).forEach(key => {
-    if (event.target[key]) {
-      formData.append(key, event.target[key].value);
+  editable.forEach(field => {
+    if (event.target[field.name]) {
+      formData.append(field.name, event.target[field.name].value);
     }
   })
   axios.post(`${KUDZU_BASE_URL}/api/content/update?type=${type}&id=${id}`, formData, {
@@ -53,7 +53,7 @@ function ContentItemEdit({itemType, itemUuid}) {
   }, [itemType, itemUuid, dispatchItem])
 
   let externalType = itemType.charAt(0).toUpperCase() + itemType.slice(1);
-  const [metadata, dispatchMetadata] = useReducer((state, action) => { return action.payload }, {})
+  const [metadata, dispatchMetadata] = useReducer((state, action) => { return action.payload }, [])
   useEffect(() => {
     fetchContentTypes(itemType)
     .then(response => {
@@ -66,7 +66,7 @@ function ContentItemEdit({itemType, itemUuid}) {
     })
   }, [itemType, externalType, dispatchMetadata])
 
-  if (!itemData.uuid || Object.keys(metadata).length === 0) {
+  if (!itemData.uuid || metadata.length === 0) {
     return null;
   }
 
@@ -74,23 +74,26 @@ function ContentItemEdit({itemType, itemUuid}) {
   ({uuid, id, slug, timestamp, updated, ...rest} = itemData);
 
   let editableFields = [];
-  for (const [name, value] of Object.entries(rest)) {
-    editableFields.push([name, value]);
-  }
+  metadata.forEach(value => {
+    if (['uuid', 'id', 'slug', 'timestamp', 'updated'].includes(value.name)) {
+      return;
+    }
+    editableFields.push(value);
+  })
 
   let textareaRef = null;
   return (
   <>
-  <form onSubmit={event => { handleContentEditSubmit(event, externalType, id, rest) }}>
+  <form onSubmit={event => { handleContentEditSubmit(event, externalType, id, editableFields) }}>
   <Grid container spacing={3}>
     <Grid item xs={3}></Grid>
     <Grid item xs={6}>
       <Button color="primary" href={`/admin/content/${itemType}`}>{'< Back'}</Button>
       <h1>Edit {rest.title}</h1>
       { editableFields.map((field, index) => {
-        let fieldName = field[0];
-        let fieldValue = field[1];
-        let fieldType = metadata[fieldName]
+        let fieldName = field.name;
+        let fieldValue = itemData[fieldName];
+        let fieldType = field.type;
         if (kudzuConfig?.types[externalType]?.fields[fieldName]?.editor) {
           fieldType = kudzuConfig.types[externalType].fields[fieldName].editor;
         }
