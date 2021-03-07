@@ -61,17 +61,19 @@ function ContentItemCreate() {
     return null;
   }
 
-  let UUID, ID, Slug, Timestamp, Updated, rest;
-  ({UUID, ID, Slug, Timestamp, Updated, ...rest} = metadata);
+  let uuid, id, slug, timestamp, updated, rest;
+  ({uuid, id, slug, timestamp, updated, ...rest} = metadata);
 
   if (Object.keys(rest) === 0) {
     return null;
   }
 
   let editableFields = [];
+  console.log(metadata)
   for (const [name, type] of Object.entries(rest)) {
     editableFields.push([name, type]);
   }
+  console.log(editableFields)
 
   let textareaRef = null
   return (

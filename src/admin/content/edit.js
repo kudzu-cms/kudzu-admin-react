@@ -90,10 +90,9 @@ function ContentItemEdit({itemType, itemUuid}) {
       { editableFields.map((field, index) => {
         let fieldName = field[0];
         let fieldValue = field[1];
-        let externalFieldName = fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
-        let fieldType = metadata[externalFieldName]
-        if (kudzuConfig?.types[externalType]?.fields[externalFieldName]?.editor) {
-          fieldType = kudzuConfig.types[externalType].fields[externalFieldName].editor;
+        let fieldType = metadata[fieldName]
+        if (kudzuConfig?.types[externalType]?.fields[fieldName]?.editor) {
+          fieldType = kudzuConfig.types[externalType].fields[fieldName].editor;
         }
         switch (fieldType) {
           case 'string':

@@ -2,7 +2,7 @@ module.exports = {
   types: {
     Test: {
       fields: {
-        Body: {
+        body: {
           editor: "string:richtext"
         }
       }
