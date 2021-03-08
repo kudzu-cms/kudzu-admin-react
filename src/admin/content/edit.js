@@ -3,6 +3,8 @@ import axios from "axios"
 import { KUDZU_BASE_URL } from "../../KudzuAdmin";
 import {
   Button,
+  Checkbox,
+  FormControlLabel,
   Grid,
   TextareaAutosize,
   TextField,
@@ -100,7 +102,7 @@ function ContentItemEdit({itemType, itemUuid}) {
         switch (fieldType) {
           case 'string':
             return <TextField defaultValue={fieldValue} key={`${fieldName}:${index}`} name={fieldName} fullWidth label={fieldName}/>
-        case 'string:richtext':
+          case 'string:richtext':
             return (
               <>
               <CKEditor
@@ -127,6 +129,12 @@ function ContentItemEdit({itemType, itemUuid}) {
               <TextareaAutosize key={`${fieldName}:${index}`} name={fieldName} label={fieldName} defaultValue={fieldValue} hidden />
               </>
             )
+          case 'bool':
+            return (
+              <FormControlLabel
+                control={<Checkbox defaultChecked={fieldValue} name={fieldName} color="primary"/>}
+                label={fieldName}
+              />)
           default:
             throw new Error(`Unknown field type: ${fieldType}`);
         }

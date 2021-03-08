@@ -8,6 +8,8 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { KUDZU_BASE_URL } from "../../KudzuAdmin";
 import {
   Button,
+  Checkbox,
+  FormControlLabel,
   Grid,
   TextareaAutosize,
   TextField,
@@ -114,6 +116,12 @@ function ContentItemCreate() {
                 <TextareaAutosize key={`${fieldName}:${index}`} name={fieldName} label={fieldName} hidden />
                 </>
               )
+              case 'bool':
+                return (
+                  <FormControlLabel
+                    control={<Checkbox defaultChecked={false} name={fieldName} color="primary"/>}
+                    label={fieldName}
+                  />)
             default:
               throw new Error(`Unknown field type: ${fieldType}`);
           }
