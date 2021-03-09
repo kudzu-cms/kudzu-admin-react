@@ -87,6 +87,7 @@ function ContentItemEdit({itemType, itemUuid}) {
   ({uuid, id, slug, timestamp, updated, ...rest} = itemData);
 
   let editableFields = [];
+  console.log(metadata)
   metadata.forEach(value => {
     if (['uuid', 'id', 'slug', 'timestamp', 'updated'].includes(value.name)) {
       return;
@@ -104,6 +105,7 @@ function ContentItemEdit({itemType, itemUuid}) {
       <Button color="primary" href={`/admin/content/${itemType}`}>{'< Back'}</Button>
       <h1>Edit {rest.title}</h1>
       { editableFields.map((field, index) => {
+        console.log(field.name, index);
         let fieldName = field.name;
         let fieldValue = itemData[fieldName];
         let fieldType = field.type;

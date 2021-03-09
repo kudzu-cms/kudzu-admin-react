@@ -17,6 +17,7 @@ import {
 import { fetchContentTypes } from "./fetch";
 import { timestampFormatter } from "./helpers"
 import kudzuConfig from "../../kudzu.config"
+import StringList from "./elements/string-list";
 
 function handleContentCreateSubmit(event, type, editable) {
   event.preventDefault();
@@ -100,6 +101,8 @@ function ContentItemCreate() {
           switch (fieldType) {
             case 'string':
               return <TextField key={`${fieldName}:${index}`} name={fieldName} fullWidth label={fieldName}/>
+            case '[]string':
+              return <StringList fieldName={fieldName} fieldIndex={index} />
             case 'string:richtext':
               return (
                 <>
