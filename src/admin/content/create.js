@@ -23,8 +23,8 @@ function handleContentCreateSubmit(event, type, editable) {
   editable.forEach(field => {
     if (event.target[field.name]) {
       let value = null;
-      switch (event.target[field.name].type) {
-        case 'checkbox':
+      switch (field.type) {
+        case 'bool':
           value = event.target[field.name].checked;
           break;
         default:
