@@ -25,6 +25,12 @@ function handleContentEditSubmit(event, type, id, editable) {
         case 'bool':
           value = event.target[field.name].checked;
           break;
+        case '[]string':
+          value = [];
+          event.target[field.name].forEach(input => {
+            value.push(input.value);
+          })
+          break;
         default:
           value = event.target[field.name].value;
       }
@@ -43,7 +49,7 @@ function handleContentEditSubmit(event, type, id, editable) {
   .then((response) => {
     console.log(response);
     if (response.status === 200 && response.data.data[0].id) {
-      window.location = `/admin/content/${type.toLowerCase()}`;
+      // window.location = `/admin/content/${type.toLowerCase()}`;
     }
   })
   .catch((error) => {

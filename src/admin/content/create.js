@@ -27,6 +27,12 @@ function handleContentCreateSubmit(event, type, editable) {
         case 'bool':
           value = event.target[field.name].checked;
           break;
+        case '[]string':
+          value = [];
+          event.target[field.name].forEach(input => {
+            value.push(input.value);
+          })
+          break;
         default:
           value = event.target[field.name].value;
       }
