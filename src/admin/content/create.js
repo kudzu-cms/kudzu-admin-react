@@ -23,7 +23,18 @@ function handleContentCreateSubmit(event, type, editable) {
   const formData = new FormData();
   editable.forEach(field => {
     if (event.target[field.name]) {
-      formData.append(field.name, event.target[field.name].value);
+      let value = null;
+      switch (event.target[field.name].type) {
+        case 'checkbox':
+          value = event.target[field.name].checked;
+          break;
+        default:
+          value = event.target[field.name].value;
+      }
+      if (value === null) {
+        throw new Error(`Unknown field value for ${field.name}`)
+      }
+      formData.append(field.name, value);
     }
   })
   axios.post(`${KUDZU_BASE_URL}/api/content/create?type=${type}`, formData, {
