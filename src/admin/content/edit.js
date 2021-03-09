@@ -11,9 +11,9 @@ import {
 } from "@material-ui/core";
 import { fetchContentItem, fetchContentTypes} from "./fetch";
 import { timestampFormatter } from "./helpers"
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import kudzuConfig from "../../kudzu.config"
+import RichText from "./elements/richtext";
+import StringList from "./elements/string-list";
 
 function handleContentEditSubmit(event, type, id, editable) {
   event.preventDefault();
@@ -95,7 +95,6 @@ function ContentItemEdit({itemType, itemUuid}) {
     editableFields.push(value);
   })
 
-  let textareaRef = null;
   return (
   <>
   <form onSubmit={event => { handleContentEditSubmit(event, externalType, id, editableFields) }}>
@@ -115,33 +114,10 @@ function ContentItemEdit({itemType, itemUuid}) {
         switch (fieldType) {
           case 'string':
             return <TextField defaultValue={fieldValue} key={`${fieldName}:${index}`} name={fieldName} fullWidth label={fieldName}/>
+          case '[]string':
+            return <StringList fieldName={fieldName} fieldIndex={index} />
           case 'string:richtext':
-            return (
-              <>
-              <CKEditor
-                  key={`${fieldName}:rich:${index}`}
-                  editor={ ClassicEditor }
-                  data={fieldValue}
-                  onChange={(event, editor) => {
-                      const data = editor.getData();
-                      if (textareaRef) {
-                        textareaRef.value = data;
-                        return
-                      }
-                      let currentElement = editor.sourceElement
-                      while (currentElement) {
-                        if (currentElement.nodeName === "TEXTAREA") {
-                          break;
-                        }
-                        currentElement = currentElement.nextElementSibling;
-                      }
-                      textareaRef = currentElement
-                      textareaRef.value = data;
-                  }}
-              />
-              <TextareaAutosize key={`${fieldName}:${index}`} name={fieldName} label={fieldName} defaultValue={fieldValue} hidden />
-              </>
-            )
+            return <RichText fieldName={fieldName} fieldIndex={index} fieldValue={fieldValue} />
           case 'bool':
             return (
               <FormControlLabel
