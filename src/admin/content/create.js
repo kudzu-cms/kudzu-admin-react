@@ -30,10 +30,6 @@ function handleContentCreateSubmit(event, type, editable) {
       case '[]string':
         fieldValue = [];
 
-        if (!fieldItem) {
-          break;
-        }
-
         // There is a single input.
         if (fieldItem.type === 'text') {
           fieldValue.push(fieldItem.value)
