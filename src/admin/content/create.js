@@ -21,25 +21,43 @@ function handleContentCreateSubmit(event, type, editable) {
   event.preventDefault();
   const formData = new FormData();
   editable.forEach(field => {
-    if (event.target[field.name]) {
-      let value = null;
-      switch (field.type) {
-        case 'bool':
-          value = event.target[field.name].checked;
+    let fieldItem = event.target[field.name];
+    let fieldValue = null;
+    switch (field.type) {
+      case 'bool':
+        fieldValue = fieldItem.checked;
+        break;
+      case '[]string':
+        fieldValue = [];
+
+        if (!fieldItem) {
           break;
-        case '[]string':
-          value = [];
-          event.target[field.name].forEach(input => {
-            value.push(input.value);
-          })
+        }
+
+        // There is a single input.
+        if (fieldItem.type === 'text') {
+          fieldValue.push(fieldItem.value)
           break;
-        default:
-          value = event.target[field.name].value;
-      }
-      if (value === null) {
-        throw new Error(`Unknown field value for ${field.name}`)
-      }
-      formData.append(field.name, value);
+        }
+
+        fieldItem.forEach(input => {
+          fieldValue.push(input.value);
+        })
+        break;
+      default:
+        fieldValue = fieldItem.value;
+    }
+    if (fieldValue === null) {
+      throw new Error(`Unknown field value for ${field.name}`)
+    }
+
+    if (Array.isArray(fieldValue)) {
+      fieldValue.forEach((subval, index) => {
+        formData.append(`${field.name}.${index}`, subval);
+      });
+    }
+    else {
+      formData.append(field.name, fieldValue);
     }
   })
   axios.post(`${KUDZU_BASE_URL}/api/content/create?type=${type}`, formData, {

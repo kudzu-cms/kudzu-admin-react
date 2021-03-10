@@ -27,15 +27,24 @@ function handleFieldAddition(event, curData) {
 }
 
 
-function StringList({fieldName, fieldIndex}) {
+function StringList({fieldName, fieldIndex, defaultValues = []}) {
 
-  const [fieldItemData, updateFieldItems] = useState([{value: ''}])
+  let initialState = [];
+  defaultValues.forEach(value => {
+    initialState.push({value: value});
+  });
+
+  if (initialState.length === 0) {
+    initialState = [{value: ''}]
+  }
+
+  const [fieldItemData, updateFieldItems] = useState(initialState)
 
   let fieldItems = [];
   fieldItemData.forEach((item, index) => {
     console.log(item);
     fieldItems.push(
-      <TextField key={`${fieldName}:${fieldIndex}:${index}`} name={fieldName} fullWidth
+      <TextField key={`${fieldName}:${fieldIndex}:${index}`} name={fieldName} defaultValue={item.value} fullWidth
         InputProps={{
           endAdornment:
           <InputAdornment position="end">

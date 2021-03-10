@@ -6,7 +6,6 @@ import {
   Checkbox,
   FormControlLabel,
   Grid,
-  TextareaAutosize,
   TextField,
 } from "@material-ui/core";
 import { fetchContentItem, fetchContentTypes} from "./fetch";
@@ -19,25 +18,43 @@ function handleContentEditSubmit(event, type, id, editable) {
   event.preventDefault();
   const formData = new FormData();
   editable.forEach(field => {
-    if (event.target[field.name]) {
-      let value = null;
-      switch (field.type) {
-        case 'bool':
-          value = event.target[field.name].checked;
+    let fieldItem = event.target[field.name];
+    let fieldValue = null;
+    switch (field.type) {
+      case 'bool':
+        fieldValue = fieldItem.checked;
+        break;
+      case '[]string':
+        fieldValue = [];
+
+        if (!fieldItem) {
           break;
-        case '[]string':
-          value = [];
-          event.target[field.name].forEach(input => {
-            value.push(input.value);
-          })
+        }
+
+        // There is a single input.
+        if (fieldItem.type === 'text') {
+          fieldValue.push(fieldItem.value)
           break;
-        default:
-          value = event.target[field.name].value;
-      }
-      if (value === null) {
-        throw new Error(`Unknown field value for ${field.name}`)
-      }
-      formData.append(field.name, value);
+        }
+
+        fieldItem.forEach(input => {
+          fieldValue.push(input.value);
+        })
+        break;
+      default:
+        fieldValue = fieldItem.value;
+    }
+    if (fieldValue === null) {
+      throw new Error(`Unknown field value for ${field.name}`)
+    }
+
+    if (Array.isArray(fieldValue)) {
+      fieldValue.forEach((subval, index) => {
+        formData.append(`${field.name}.${index}`, subval);
+      });
+    }
+    else {
+      formData.append(field.name, fieldValue);
     }
   })
   axios.post(`${KUDZU_BASE_URL}/api/content/update?type=${type}&id=${id}`, formData, {
@@ -49,7 +66,7 @@ function handleContentEditSubmit(event, type, id, editable) {
   .then((response) => {
     console.log(response);
     if (response.status === 200 && response.data.data[0].id) {
-      // window.location = `/admin/content/${type.toLowerCase()}`;
+      window.location = `/admin/content/${type.toLowerCase()}`;
     }
   })
   .catch((error) => {
@@ -110,10 +127,10 @@ function ContentItemEdit({itemType, itemUuid}) {
       <Button color="primary" href={`/admin/content/${itemType}`}>{'< Back'}</Button>
       <h1>Edit {rest.title}</h1>
       { editableFields.map((field, index) => {
-        console.log(field.name, index);
         let fieldName = field.name;
         let fieldValue = itemData[fieldName];
         let fieldType = field.type;
+        console.log(field.name, index, itemData[fieldName]);
         if (kudzuConfig?.types[externalType]?.fields[fieldName]?.editor) {
           fieldType = kudzuConfig.types[externalType].fields[fieldName].editor;
         }
@@ -121,7 +138,7 @@ function ContentItemEdit({itemType, itemUuid}) {
           case 'string':
             return <TextField defaultValue={fieldValue} key={`${fieldName}:${index}`} name={fieldName} fullWidth label={fieldName}/>
           case '[]string':
-            return <StringList fieldName={fieldName} fieldIndex={index} />
+            return <StringList fieldName={fieldName} fieldIndex={index} defaultValues={fieldValue} />
           case 'string:richtext':
             return <RichText fieldName={fieldName} fieldIndex={index} fieldValue={fieldValue} />
           case 'bool':
