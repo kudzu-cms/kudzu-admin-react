@@ -9,20 +9,19 @@ import {
   TextField,
 } from "@material-ui/core";
 
-function handleFieldRemoval(event, curData, index) {
+function handleFieldRemoval(event, fieldName, curData, index) {
   let data = [...curData]
   data.splice(index, 1)
   if (data.length === 0) {
+    document.getElementsByClassName(`string-list--${fieldName}`)[0].querySelector('input').value = '';
     data.push([{value: ''}])
   }
-  console.log(data)
   return data;
 }
 
 function handleFieldAddition(event, curData) {
   let data = [...curData];
   data.push({value: ''})
-  console.log(data)
   return data
 }
 
@@ -42,7 +41,6 @@ function StringList({fieldName, fieldIndex, defaultValues = []}) {
 
   let fieldItems = [];
   fieldItemData.forEach((item, index) => {
-    console.log(item);
     fieldItems.push(
       <TextField key={`${fieldName}:${fieldIndex}:${index}`} name={fieldName} defaultValue={item.value} fullWidth
         InputProps={{
@@ -53,7 +51,7 @@ function StringList({fieldName, fieldIndex, defaultValues = []}) {
               edge="end"
               key={`item:${index}`}
               onClick={(event) => {
-                updateFieldItems(handleFieldRemoval(event, fieldItemData, index))
+                updateFieldItems(handleFieldRemoval(event, fieldName, fieldItemData, index))
               }}
           >
           <CloseIcon/>
@@ -65,7 +63,7 @@ function StringList({fieldName, fieldIndex, defaultValues = []}) {
   })
 
   return (
-    <FormGroup>
+    <FormGroup className={`string-list--${fieldName}`}>
       <FormLabel>{fieldName}</FormLabel>
       { fieldItems }
       <IconButton
