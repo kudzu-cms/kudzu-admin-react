@@ -6,6 +6,7 @@ import {
   Checkbox,
   FormControlLabel,
   Grid,
+  Input,
   TextField,
 } from "@material-ui/core";
 import { fetchContentItem, fetchContentTypes} from "./fetch";
@@ -20,7 +21,12 @@ function handleContentEditSubmit(event, type, id, editable) {
   editable.forEach(field => {
     let fieldItem = event.target[field.name];
     let fieldValue = null;
-    switch (field.type) {
+
+    let fieldType = field.type;
+    if (kudzuConfig?.types[type]?.fields[field.name]?.editor) {
+      fieldType = kudzuConfig?.types[type]?.fields[field.name]?.editor
+    }
+    switch (fieldType) {
       case 'bool':
         fieldValue = fieldItem.checked;
         break;
@@ -36,6 +42,9 @@ function handleContentEditSubmit(event, type, id, editable) {
         fieldItem.forEach(input => {
           fieldValue.push(input.value);
         })
+        break;
+      case 'string:file':
+        fieldValue = fieldItem.files[0];
         break;
       default:
         fieldValue = fieldItem.value;
@@ -130,11 +139,17 @@ function ContentItemEdit({itemType, itemUuid}) {
         if (kudzuConfig?.types[externalType]?.fields[fieldName]?.editor) {
           fieldType = kudzuConfig.types[externalType].fields[fieldName].editor;
         }
+        console.log(itemData)
         switch (fieldType) {
           case 'string':
             return <TextField defaultValue={fieldValue} key={`${fieldName}:${index}`} name={fieldName} fullWidth label={fieldName}/>
           case '[]string':
             return <StringList fieldName={fieldName} fieldIndex={index} defaultValues={fieldValue} />
+          case 'string:file':
+            return (
+              fieldValue ? <img src={`${KUDZU_BASE_URL}/${fieldValue}`} style={{maxWidth: "250px"}} /> :
+                <Input accept="image/*" name={fieldName} type="file" />
+            )
           case 'string:richtext':
             return <RichText fieldName={fieldName} fieldIndex={index} fieldValue={fieldValue} />
           case 'bool':

@@ -1,5 +1,5 @@
 
-import React, { useEffect, useReducer } from "react"
+import React, { useEffect, useReducer, useRef } from "react"
 import axios from "axios"
 import { useParams } from "react-router-dom";
 
@@ -9,6 +9,7 @@ import {
   Checkbox,
   FormControlLabel,
   Grid,
+  Input,
   TextField,
 } from "@material-ui/core";
 import { fetchContentTypes } from "./fetch";
@@ -23,7 +24,12 @@ function handleContentCreateSubmit(event, type, editable) {
   editable.forEach(field => {
     let fieldItem = event.target[field.name];
     let fieldValue = null;
-    switch (field.type) {
+
+    let fieldType = field.type;
+    if (kudzuConfig?.types[type]?.fields[field.name]?.editor) {
+      fieldType = kudzuConfig?.types[type]?.fields[field.name]?.editor
+    }
+    switch (fieldType) {
       case 'bool':
         fieldValue = fieldItem.checked;
         break;
@@ -39,6 +45,9 @@ function handleContentCreateSubmit(event, type, editable) {
         fieldItem.forEach(input => {
           fieldValue.push(input.value);
         })
+        break;
+      case 'string:file':
+        fieldValue = fieldItem.files[0];
         break;
       default:
         fieldValue = fieldItem.value;
@@ -65,7 +74,7 @@ function handleContentCreateSubmit(event, type, editable) {
   .then((response) => {
     console.log(response);
     if (response.status === 200 && response.data.data[0].id) {
-      window.location = `/admin/content/${type.toLowerCase()}`;;
+      // window.location = `/admin/content/${type.toLowerCase()}`;;
     }
   })
   .catch((error) => {
@@ -120,6 +129,10 @@ function ContentItemCreate() {
               return <TextField key={`${fieldName}:${index}`} name={fieldName} fullWidth label={fieldName}/>
             case '[]string':
               return <StringList fieldName={fieldName} fieldIndex={index} />
+            case 'string:file':
+              return (
+                <Input accept="image/*" name={fieldName} type="file" />
+              )
             case 'string:richtext':
               return <RichText fieldName={fieldName} fieldIndex={index} />
               case 'bool':

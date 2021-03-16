@@ -13,6 +13,7 @@ function handleFieldRemoval(event, fieldName, curData, index) {
   let data = [...curData]
   data.splice(index, 1)
   if (data.length === 0) {
+    // @todo Use ref instead.
     document.getElementsByClassName(`string-list--${fieldName}`)[0].querySelector('input').value = '';
     data.push([{value: ''}])
   }

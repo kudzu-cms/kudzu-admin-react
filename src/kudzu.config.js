@@ -4,6 +4,9 @@ module.exports = {
       fields: {
         body: {
           editor: "string:richtext"
+        },
+        file: {
+          editor: "string:file",
         }
       }
     }
